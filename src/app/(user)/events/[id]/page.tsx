@@ -19,7 +19,10 @@ export default async function EventDetailsPage({ params }: PageProps) {
 
   return (
     <main className="p-8">
-      <h1 className="text-3xl font-bold mb-4">{evento.nome}</h1>
+      <div className="flex items-center gap-4 mb-6 flex-col sm:flex-row">
+        <img src="/SBC_icon.png" alt="Ícone SBC" className="w-24 h-24 object-contain" />
+        <h1 className="text-3xl font-bold mb-4">{evento.nome}</h1>
+      </div>
       <p className="text-lg text-gray-700"><strong>Data:</strong> {new Date(evento.data).toLocaleDateString()}</p>
       <p className="text-lg text-gray-700"><strong>Local:</strong> {evento.local}</p>
       <p className="mt-4">{evento.descricao}</p>
