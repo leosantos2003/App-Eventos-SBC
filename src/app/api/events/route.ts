@@ -20,7 +20,8 @@ export async function POST(request: Request) {
 
     const newEvent = await createEvent({ nome, data, local, descricao });
     return NextResponse.json(newEvent, { status: 201 });
-  } catch (error) {
+  } catch (err) {
+    console.error(err);
     return NextResponse.json({ error: 'Erro ao criar evento' }, { status: 500 });
   }
 }

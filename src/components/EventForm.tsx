@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, FormEvent } from 'react';
+import styles from './Criar_evento.module.css';
 
 export const EventForm = () => {
   const [nome, setNome] = useState('');
@@ -34,7 +35,7 @@ export const EventForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 max-w-lg mx-auto">
+    <form onSubmit={handleSubmit} className={`${styles['criar-evento-form']} space-y-4 max-w-lg mx-auto`}>
       <div>
         <label htmlFor="nome" className="block text-sm font-medium text-gray-700">Nome do Evento</label>
         <input type="text" id="nome" value={nome} onChange={(e) => setNome(e.target.value)} required className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-black" />

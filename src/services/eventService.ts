@@ -2,7 +2,7 @@
 import { Evento } from '@/types';
 
 // Usamos um array em memória para simular um banco de dados.
-let eventos: Evento[] = [
+const eventos: Evento[] = [
   {
     id: '1',
     nome: 'Congresso Anual da SBC',
