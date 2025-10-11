@@ -1,5 +1,6 @@
 // src/app/(user)/events/[id]/page.tsx
 import { getEventById } from '@/services/eventService';
+import Link from 'next/link';
 
 interface PageProps {
   params: { id: string };
@@ -23,10 +24,13 @@ export default async function EventDetailsPage({ params }: PageProps) {
       <p className="text-lg text-gray-700"><strong>Local:</strong> {evento.local}</p>
       <p className="mt-4">{evento.descricao}</p>
       
-      {/* Este botão é um placeholder para a funcionalidade da Etapa 3 */}
-      <button className="mt-6 py-2 px-4 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700">
+      {/* Link para a página de solicitar hospedagem */}
+      <Link
+        href={`/events/${params.id}/solicitar-hospedagem`}
+        className="mt-6 inline-block py-2 px-4 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700"
+      >
         Solicitar Hospedagem
-      </button>
+      </Link>
     </main>
   );
 }
