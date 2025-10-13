@@ -1,68 +1,106 @@
-import Link from 'next/link';
+import Link from "next/link";
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { events, users, userEvents } from "@/lib/data";
+import {
+  Calendar,
+  CalendarIcon,
+  ChevronLeftIcon,
+  MapPin,
+  MapPinIcon,
+} from "lucide-react";
+import { ModeToggle } from "@/components/mode-toggle";
+import { Header } from "@/components/ui/header";
 
-import { ModeToggle } from '@/components/mode-toggle';
+// Função para buscar todos os eventos de um usuário
+const getUserEventsData = (userId: number) => {
+  const user = users.find((u) => u.id === userId);
+  const userEventLinks = userEvents.filter((ue) => ue.userId === userId);
+  const userEventsDetails = userEventLinks
+    .map((link) => {
+      return events.find((event) => event.id === link.eventId);
+    })
+    .filter((event) => event !== undefined);
 
-// Simula a busca de dados para o usuário logado (ID 1)
-const getUserEventData = (userId: number) => {
-  const user = users.find(u => u.id === userId);
-  const userEventLink = userEvents.find(ue => ue.userId === userId);
-  const event = events.find(e => e.id === userEventLink?.eventId);
-  return { user, event };
-}
+  return { user, userEvents: userEventsDetails as typeof events };
+};
 
 export default function UserDashboard() {
-  const { user, event } = getUserEventData(1); // Simula o usuário logado
+  const userId = 1; // Simula o ID do usuário logado
+  const { user, userEvents } = getUserEventsData(userId);
 
-  if (!user || !event) {
+  if (!user) {
     return (
       <main className="p-8">
-        <h1 className="text-2xl font-bold">Nenhum evento encontrado para você.</h1>
+        <h1 className="text-2xl font-bold">Usuário não encontrado.</h1>
       </main>
     );
   }
 
   return (
-    <div className="flex flex-col min-h-dvh">
-      <header className="bg-primary text-primary-foreground px-4 lg:px-6 h-14 flex items-center justify-between shadow">
-        <Link href="/" className="flex items-center justify-center gap-2" prefetch={false}>
-          <span className="font-semibold text-lg">SBC Eventos</span>
+    <div className="max-w-4xl mx-auto">
+      <div className="mb-4">
+        <Link href="/">
+          <Button variant="outline" size="icon">
+            <ChevronLeftIcon />
+          </Button>
         </Link>
-        <ModeToggle />
-      </header>
-
-    <main className="flex items-center justify-center min-h-screen bg-gray-50 p-8">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-2 text-gray-800">Olá, {user.name}!</h1>
-        <p className="text-gray-600 mb-8">Você foi convidado para o seguinte evento. Aqui estão os detalhes:</p>
-        
-        <Card>
-          <CardHeader><CardTitle>{event.name}</CardTitle></CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <p><strong>Data:</strong> {event.date}</p>
-              <p><strong>Local:</strong> {event.location}</p>
-              <p><strong>Descrição:</strong> {event.description}</p>
-            </div>
-            <div className="border-t mt-6 pt-6 flex justify-end">
-              <Link href="/dashboard/request" passHref>
-                <Button>Solicitar Hospedagem</Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
       </div>
-    </main>
+
+      <div className="mb-8">
+        <h1 className="text-3xl mb-2 font-semibold tracking-tight">
+          Olá, {user.name}!
+        </h1>
+        <p className="text-muted-foreground">
+          Você foi convidado para os seguintes eventos. Escolha um para
+          interagir.
+        </p>
+      </div>
+
+      {userEvents.length > 0 ? (
+        <div className="space-y-6">
+          {userEvents.map((event) => (
+            <Card key={event.id}>
+              <CardHeader>
+                <CardTitle>{event.name}</CardTitle>
+                <div className="flex items-center gap-4 text-sm text-muted-foreground pt-2">
+                  <div className="flex items-center gap-1.5">
+                    <CalendarIcon className="h-4 w-4" />
+                    <span>{event.date}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <MapPinIcon className="h-4 w-4" />
+                    <span>{event.location}</span>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  {event.description}
+                </p>
+              </CardContent>
+              <CardFooter className="justify-end">
+                <Link href={`/dashboard/${event.id}/request`} passHref>
+                  <Button>Solicitar hospedagem</Button>
+                </Link>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <Card className="text-center p-10">
+          <p className="text-muted-foreground">
+            Você ainda não foi convidado para nenhum evento.
+          </p>
+        </Card>
+      )}
     </div>
   );
 }

@@ -19,11 +19,27 @@ export const events: Event[] = [
     date: '05-07 de Dezembro, 2025',
     location: 'UFRGS, Porto Alegre',
     description: 'Uma festa para comemorarmos a Engenharia de Software.',
+  },
+  {
+    id: 103,
+    name: 'Mais Um Evento de Teste',
+    date: '01-02 de Janeiro, 2026',
+    location: 'Tóquio, Japão',
+    description: 'Uma evento de teste qualquer.',
+  },
+  {
+    id: 104,
+    name: 'Mais Um Evento de Teste...',
+    date: '01-02 de Janeiro, 2028',
+    location: 'Tóquio, China',
+    description: 'Uma evento de teste qualquer.',
   }
 ];
 
 export const userEvents: UserEvent[] = [
   { userId: 1, eventId: 101 },
+  { userId: 1, eventId: 102 },
+  { userId: 1, eventId: 104 }
 ];
 
 // Array para armazenar as solicitações (simulando um banco de dados)
