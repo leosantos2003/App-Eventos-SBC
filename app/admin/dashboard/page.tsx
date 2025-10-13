@@ -4,7 +4,7 @@ import { Card, CardHeader, CardContent } from "@/components/ui/card";
 
 export default function AdminDashboard() {
   return (
-    <main className="min-h-screen bg-gray-50 p-8">
+    <main className="flex items-center justify-center min-h-screen bg-gray-50 p-8">
       <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold mb-8 text-gray-800">Painel do Administrador</h1>
         

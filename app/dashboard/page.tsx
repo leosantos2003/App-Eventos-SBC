@@ -1,5 +1,13 @@
 import Link from 'next/link'; // Importe o Link
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Button } from "@/components/ui/button"; // Importe o Button
 import { events, users, userEvents } from "@/lib/data";
 
@@ -23,13 +31,13 @@ export default function UserDashboard() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 p-8">
+    <main className="flex items-center justify-center min-h-screen bg-gray-50 p-8">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold mb-2 text-gray-800">Olá, {user.name}!</h1>
         <p className="text-gray-600 mb-8">Você foi convidado para o seguinte evento. Aqui estão os detalhes:</p>
         
         <Card>
-          <CardHeader>{event.name}</CardHeader>
+          <CardHeader><CardTitle>{event.name}</CardTitle></CardHeader>
           <CardContent>
             <div className="space-y-4">
               <p><strong>Data:</strong> {event.date}</p>

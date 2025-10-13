@@ -20,7 +20,7 @@ export default function RequestRoomPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 p-8">
+    <main className="flex items-center justify-center min-h-screen bg-gray-50 p-8">
       <div className="max-w-2xl mx-auto">
         <Card>
           <CardHeader>

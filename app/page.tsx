@@ -12,19 +12,23 @@ import {
 
 export default function LoginPage() {
   return (
-    <main className="flex items-center justify-center min-h-screen bg-gray-100">
+    <main className="flex items-center justify-center min-h-screen">
       <Card className="w-full max-w-md">
         <CardHeader>
-          SBC - Sistema de Gestão de Eventos
+          <CardTitle>
+            SBC - Sistema de Gestão de Eventos
+          </CardTitle>
+          <CardDescription>
+            Selecione o perfil para continuar:
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="mb-6 text-center text-gray-600">Selecione o perfil para continuar:</p>
-          <div className="flex flex-col space-y-4">
+          <div className="flex flex-col gap-2">
             <Link href="/dashboard" passHref>
-              <Button className="w-full">Entrar como Convidado</Button>
+              <Button type="submit" className="w-full">Entrar como Convidado</Button>
             </Link>
             <Link href="/admin/dashboard" passHref>
-              <Button className="w-full bg-gray-700 hover:bg-gray-800">Entrar como Administrador</Button>
+              <Button className="w-full">Entrar como Administrador</Button>
             </Link>
           </div>
         </CardContent>
