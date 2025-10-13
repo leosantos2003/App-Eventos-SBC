@@ -8,6 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { events } from "@/lib/data"; // Usamos os dados mockados para obter o nome do evento
 
+import Link from 'next/link';
+import { ModeToggle } from '@/components/mode-toggle';
+
 export default function RequestRoomPage() {
   // Simula a busca do evento do usuário
   const event = events.find(e => e.id === 101);
@@ -20,6 +23,14 @@ export default function RequestRoomPage() {
   };
 
   return (
+    <div className="flex flex-col min-h-dvh">
+      <header className="bg-primary text-primary-foreground px-4 lg:px-6 h-14 flex items-center justify-between shadow">
+        <Link href="/" className="flex items-center justify-center gap-2" prefetch={false}>
+          <span className="font-semibold text-lg">SBC Eventos</span>
+        </Link>
+        <ModeToggle />
+      </header>
+
     <main className="flex items-center justify-center min-h-screen bg-gray-50 p-8">
       <div className="max-w-2xl mx-auto">
         <Card>
@@ -68,5 +79,6 @@ export default function RequestRoomPage() {
         </Card>
       </div>
     </main>
+    </div>
   );
 }

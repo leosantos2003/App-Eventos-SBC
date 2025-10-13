@@ -11,6 +11,8 @@ import {
 import { Button } from "@/components/ui/button"; // Importe o Button
 import { events, users, userEvents } from "@/lib/data";
 
+import { ModeToggle } from '@/components/mode-toggle';
+
 // Simula a busca de dados para o usuário logado (ID 1)
 const getUserEventData = (userId: number) => {
   const user = users.find(u => u.id === userId);
@@ -31,6 +33,14 @@ export default function UserDashboard() {
   }
 
   return (
+    <div className="flex flex-col min-h-dvh">
+      <header className="bg-primary text-primary-foreground px-4 lg:px-6 h-14 flex items-center justify-between shadow">
+        <Link href="/" className="flex items-center justify-center gap-2" prefetch={false}>
+          <span className="font-semibold text-lg">SBC Eventos</span>
+        </Link>
+        <ModeToggle />
+      </header>
+
     <main className="flex items-center justify-center min-h-screen bg-gray-50 p-8">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold mb-2 text-gray-800">Olá, {user.name}!</h1>
@@ -53,5 +63,6 @@ export default function UserDashboard() {
         </Card>
       </div>
     </main>
+    </div>
   );
 }
