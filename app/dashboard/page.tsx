@@ -1,4 +1,4 @@
-import Link from 'next/link'; // Importe o Link
+import Link from 'next/link';
 import {
   Card,
   CardAction,
@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"; // Importe o Button
+import { Button } from "@/components/ui/button";
 import { events, users, userEvents } from "@/lib/data";
 
 import { ModeToggle } from '@/components/mode-toggle';

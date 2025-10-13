@@ -1,28 +1,41 @@
-import { User, Event, UserEvent } from '@/types';
+import { User, Event, UserEvent, Request } from '@/types';
 
 export const users: User[] = [
-  { id: 1, name: 'Convidado Joãozinho', email: 'convidadojoaozinho@gmail.com', role: 'guest' },
-  { id: 2, name: 'Administrador Legal', email: 'administradorlegal@gmail.com', role: 'admin' },
+  { id: 1, name: 'Convidado Teste', email: 'convidado@sbc.com', role: 'guest' },
+  { id: 2, name: 'Administrador SBC', email: 'admin@sbc.com', role: 'admin' },
 ];
 
 export const events: Event[] = [
   {
     id: 101,
-    name: 'Congresso Anual da SBC',
+    name: 'Evento Anual da SBC',
     date: '15-18 de Novembro, 2025',
-    location: 'Centro de Convenções, São Paulo',
-    description: 'O maior evento de computação da América Latina, reunindo pesquisadores, estudantes e profissionais da área.',
+    location: 'Instituto de Informática, UFRGS',
+    description: 'Evento anual de computação da SBC.',
   },
   {
     id: 102,
-    name: 'Simpósio de Engenharia de Software',
+    name: 'Festa da Engenharia de Software',
     date: '05-07 de Dezembro, 2025',
     location: 'UFRGS, Porto Alegre',
-    description: 'Focado nas últimas tendências e pesquisas em engenharia de software.',
+    description: 'Uma festa para comemorarmos a Engenharia de Software.',
   }
 ];
 
-// Associa o usuário "Convidado Joãozinho" ao evento "Congresso Anual da SBC"
 export const userEvents: UserEvent[] = [
   { userId: 1, eventId: 101 },
 ];
+
+// Array para armazenar as solicitações (simulando um banco de dados)
+export let requests: Request[] = [];
+
+// Função para adicionar uma nova solicitação
+export const addRequest = (newRequestData: Omit<Request, 'id' | 'status'>) => {
+  const newId = requests.length > 0 ? Math.max(...requests.map(r => r.id)) + 1 : 1;
+  const newRequest: Request = {
+    id: newId,
+    ...newRequestData,
+    status: 'Pendente',
+  };
+  requests.push(newRequest);
+};
