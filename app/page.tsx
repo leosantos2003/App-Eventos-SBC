@@ -21,10 +21,10 @@ export default function LoginPage() {
           <p className="mb-6 text-center text-gray-600">Selecione o perfil para continuar:</p>
           <div className="flex flex-col space-y-4">
             <Link href="/dashboard" passHref>
-              <Button className="w-full">Entrar como Convidado (Ana Cláudia)</Button>
+              <Button className="w-full">Entrar como Convidado</Button>
             </Link>
             <Link href="/admin/dashboard" passHref>
-              <Button className="w-full bg-gray-700 hover:bg-gray-800">Entrar como Administrador (Fernando)</Button>
+              <Button className="w-full bg-gray-700 hover:bg-gray-800">Entrar como Administrador</Button>
             </Link>
           </div>
         </CardContent>
