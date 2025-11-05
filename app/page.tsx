@@ -22,8 +22,13 @@ export default function LoginPage() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-3">
-            <Link href="/dashboard" passHref>
+            <Link href="/login" passHref>
               <Button className="w-full">Entrar como convidado</Button>
+            </Link>
+            <Link href="/dashboard" passHref>
+              <Button variant="secondary" className="w-full">
+                Entrar como convidado sem conta
+              </Button>
             </Link>
             <Link href="/admin/dashboard" passHref>
               <Button variant="secondary" className="w-full">

@@ -11,7 +11,7 @@ export const events: Event[] = [
     name: 'Evento Anual da SBC',
     date: '15-18 de Novembro, 2025',
     location: 'Instituto de Informática, UFRGS',
-    description: 'Evento anual de computação da SBC.',
+    description: 'Evento anual de computação da SBC. Descrição do evento bla bla bla bla bla.',
   },
   {
     id: 102,
@@ -25,13 +25,6 @@ export const events: Event[] = [
     name: 'Mais Um Evento de Teste',
     date: '01-02 de Janeiro, 2026',
     location: 'Tóquio, Japão',
-    description: 'Uma evento de teste qualquer.',
-  },
-  {
-    id: 104,
-    name: 'Mais Um Evento de Teste...',
-    date: '01-02 de Janeiro, 2028',
-    location: 'Tóquio, China',
     description: 'Uma evento de teste qualquer.',
   }
 ];
