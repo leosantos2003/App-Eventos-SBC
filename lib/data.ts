@@ -36,7 +36,7 @@ export const userEvents: UserEvent[] = [
 ];
 
 // Array para armazenar as solicitações (simulando um banco de dados)
-export let requests: Request[] = [];
+export const requests: Request[] = [];
 
 // Função para adicionar uma nova solicitação
 export const addRequest = (newRequestData: Omit<Request, 'id' | 'status'>) => {

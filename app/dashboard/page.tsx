@@ -1,4 +1,5 @@
 import Link from "next/link";
+import "@/app/dashboard/CardsEventos.css";
 import {
   Card,
   CardContent,
@@ -65,33 +66,35 @@ export default function UserDashboard() {
       </div>
 
       {userEvents.length > 0 ? (
-        <div className="space-y-6">
+        <div className="cardsContainer">
           {userEvents.map((event) => (
-            <Card key={event.id}>
-              <CardHeader>
-                <CardTitle>{event.name}</CardTitle>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground pt-2">
-                  <div className="flex items-center gap-1.5">
-                    <CalendarIcon className="h-4 w-4" />
-                    <span>{event.date}</span>
+            <div className="card" key={event.id}>
+              <Card>
+                <CardHeader>
+                  <CardTitle>{event.name}</CardTitle>
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground pt-2">
+                    <div className="flex items-center gap-1.5">
+                      <CalendarIcon className="h-4 w-4" />
+                      <span>{event.date}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <MapPinIcon className="h-4 w-4" />
+                      <span>{event.location}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <MapPinIcon className="h-4 w-4" />
-                    <span>{event.location}</span>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  {event.description}
-                </p>
-              </CardContent>
-              <CardFooter className="justify-end">
-                <Link href={`/dashboard/${event.id}/request`} passHref>
-                  <Button>Solicitar hospedagem</Button>
-                </Link>
-              </CardFooter>
-            </Card>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    {event.description}
+                  </p>
+                </CardContent>
+                <CardFooter className="justify-end">
+                  <Link href={`/dashboard/${event.id}`} passHref>
+                    <Button>Mais Informações</Button>
+                  </Link>
+                </CardFooter>
+              </Card>
+            </div>
           ))}
         </div>
       ) : (
