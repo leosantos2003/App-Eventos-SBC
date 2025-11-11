@@ -1,3 +1,4 @@
+"use client";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,8 +12,36 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ChevronLeftIcon } from "lucide-react";
+import { loginUser } from '../api/auth'
+import { FormEvent, ChangeEvent } from "react";
+import { useRouter } from "next/navigation";
 
 export default function GuestLoginPage() {
+  const router = useRouter();
+
+  async function onLogin(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault(); // impede reload
+    const formData = new FormData(e.currentTarget);
+
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+
+    localStorage.removeItem("access");
+    localStorage.removeItem("refresh");
+
+    try {
+      const response = await loginUser({ email, password });
+
+      if (response.access && response.refresh) {
+        localStorage.setItem("access", response.access);
+        localStorage.setItem("refresh", response.refresh);
+        router.push("/dashboard");
+      }
+    } catch (error: any) {
+      alert("Falha na autenticação");
+    }
+  }
+
   return (
     <div>
       <div className="mb-4">
@@ -32,8 +61,8 @@ export default function GuestLoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form
-              action="/dashboard" // Redireciona para o dashboard após o "login"
+            <form onSubmit={onLogin}
+              // action="/dashboard" // Redireciona para o dashboard após o "login"
               className="space-y-6"
             >
               {/* Campos de Input agrupados */}

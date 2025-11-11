@@ -1,8 +1,8 @@
 import { User, Event, UserEvent, Request } from '@/types';
 
 export const users: User[] = [
-  { id: 1, name: 'Convidado Teste', email: 'convidado@sbc.com', role: 'guest' },
-  { id: 2, name: 'Administrador SBC', email: 'admin@sbc.com', role: 'admin' },
+  { cpf: 1, name: 'Convidado Teste', email: 'convidado@sbc.com', birthDate: '07/05/2003', password: '12345678' },
+  { cpf: 2, name: 'Administrador SBC', email: 'admin@sbc.com', birthDate: '07/05/2003', password: '12345678' },
 ];
 
 export const events: Event[] = [

@@ -1,8 +1,9 @@
 export interface User {
-  id: number;
+  cpf: number;
   name: string;
   email: string;
-  role: 'admin' | 'guest';
+  birthDate: string;
+  password: string;
 }
 
 export interface Event {

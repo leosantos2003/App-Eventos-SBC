@@ -21,9 +21,9 @@ import { ModeToggle } from "@/components/mode-toggle";
 import { Header } from "@/components/ui/header";
 
 // Função para buscar todos os eventos de um usuário
-const getUserEventsData = (userId: number) => {
-  const user = users.find((u) => u.id === userId);
-  const userEventLinks = userEvents.filter((ue) => ue.userId === userId);
+const getUserEventsData = (userCpf: number) => {
+  const user = users.find((u) => u.cpf === userCpf);
+  const userEventLinks = userEvents.filter((ue) => ue.userId === userCpf);
   const userEventsDetails = userEventLinks
     .map((link) => {
       return events.find((event) => event.id === link.eventId);
