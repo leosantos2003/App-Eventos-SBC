@@ -30,7 +30,6 @@ type NewRequestData = {
   checkinDate: string;
   checkoutDate: string;
   cpf: string;
-  rg: string;
   role: string;
   email: string;
   phone: string;
@@ -38,18 +37,7 @@ type NewRequestData = {
   observations?: string;
 };
 
-type TravelRequestData = {
-  name: string;
-  departDate: string;
-  departOrigin: string;
-  departDestination: string;
-  departShift: string;
-  returnDate?: string;
-  returnOrigin?: string;
-  returnDestination?: string;
-  returnShift?: string;
-  observations?: string;
-};
+// Travel request type removed because travel submission is simulated in this form
 
 export default function RequestForm({
   event,
@@ -60,22 +48,46 @@ export default function RequestForm({
 }) {
   const router = useRouter();
   const userId = 1; // Simula o ID do usuário logado
+  const [nameState, setNameState] = useState("");
   const [role, setRole] = useState("");
-  const [showTravelPrompt, setShowTravelPrompt] = useState(false);
   const [showTravelForm, setShowTravelForm] = useState(false);
-  const [travelData, setTravelData] = useState<TravelRequestData | null>(null);
   const [departShift, setDepartShift] = useState("");
   const [returnShift, setReturnShift] = useState("");
   const [submittedData, setSubmittedData] = useState<NewRequestData | null>(null);
+
+  const [departOriginState, setDepartOriginState] = useState("");
+  const [departDestinationState, setDepartDestinationState] = useState("");
+  const [returnEdited, setReturnEdited] = useState(false);
+
+  const autoFillReturnIfAppropriate = (
+    departOrigin: string,
+    departDestination: string
+  ) => {
+    if (returnEdited) return;
+    const returnOriginInput = document.querySelector(
+      'input[name="return-origin"]'
+    ) as HTMLInputElement | null;
+    const returnDestinationInput = document.querySelector(
+      'input[name="return-destination"]'
+    ) as HTMLInputElement | null;
+    if (!returnOriginInput || !returnDestinationInput) return;
+
+  const currentlyAutoOrigin = returnOriginInput.value === departDestination;
+  const currentlyAutoDestination = returnDestinationInput.value === departOrigin;
+    const empty = !returnOriginInput.value && !returnDestinationInput.value;
+
+    if (empty || (currentlyAutoOrigin && currentlyAutoDestination)) {
+      returnOriginInput.value = departDestination;
+      returnDestinationInput.value = departOrigin;
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
 
-    const rawName = formData.get("name");
-    const rawBirth = formData.get("birth-date");
+  const rawBirth = formData.get("birth-date");
     const rawCpf = formData.get("cpf");
-    const rawRg = formData.get("rg");
     const rawRole = formData.get("role");
     const rawEmail = formData.get("email");
   const rawCheckin = formData.get("checkin-date");
@@ -84,10 +96,9 @@ export default function RequestForm({
   const rawNumberOfPeople = formData.get("number-of-people");
   const rawObservations = formData.get("observations");
 
-    const name = typeof rawName === "string" ? rawName.trim() : "";
+  const name = nameState.trim();
     const birthDate = typeof rawBirth === "string" ? rawBirth : "";
     const cpf = typeof rawCpf === "string" ? rawCpf.trim() : "";
-    const rg = typeof rawRg === "string" ? rawRg.trim() : "";
     const roleValue = typeof rawRole === "string" ? rawRole : "";
     const email = typeof rawEmail === "string" ? rawEmail.trim() : "";
   const checkin = typeof rawCheckin === "string" ? rawCheckin : "";
@@ -112,11 +123,6 @@ export default function RequestForm({
       return;
     }
 
-    if (!rg) {
-      alert("Por favor informe o RG.");
-      return;
-    }
-
     if (!roleValue) {
       alert("Por favor selecione a função.");
       return;
@@ -137,7 +143,6 @@ export default function RequestForm({
       return;
     }
 
-    // Validação número de pessoas
     if (isNaN(numberOfPeople) || numberOfPeople < 1) {
       alert("Por favor informe o número de pessoas (mínimo 1).");
       return;
@@ -156,26 +161,10 @@ export default function RequestForm({
       return calc(10) === parseInt(s.charAt(9)) && calc(11) === parseInt(s.charAt(10));
     };
 
-    const validateRG = (raw: string) => {
-      const s = raw.replace(/[^0-9]/g, "");
-      if (!s) return false;
-
-      if (/^[0-9]+$/.test(s) && /^(\d)\1+$/.test(s)) return false;
-
-      if (/^[0-9]{7,11}$/.test(s)) return true;
-      
-      return false;
-    };
-
     if (!validateCPF(cpf)) {
       alert("CPF inválido.");
       return;
     }
-    /*
-    if (!validateRG(rg)) {
-      alert("RG inválido. Deve conter entre 7 e 9 dígitos.");
-      return;
-    }*/
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
@@ -221,7 +210,6 @@ export default function RequestForm({
       checkinDate: checkin,
       checkoutDate: checkout,
       cpf,
-      rg,
       role: roleValue,
       email,
       phone,
@@ -229,81 +217,65 @@ export default function RequestForm({
       observations,
     };
 
-    // Guardamos os dados e abrimos o prompt para solicitar viagem (expansível)
+    // Guardamos os dados básicos
     setSubmittedData(newRequestData);
-    setShowTravelPrompt(true);
+
+    if (showTravelForm) {
+      const rawTravelName = formData.get("travel-name");
+      const rawDepart = formData.get("depart-date");
+      const rawDepartOrigin = formData.get("depart-origin");
+      const rawDepartDestination = formData.get("depart-destination");
+      const rawDepartShift = formData.get("depart-shift");
+      const rawReturn = formData.get("return-date");
+      const rawReturnOrigin = formData.get("return-origin");
+      const rawReturnDestination = formData.get("return-destination");
+  const rawReturnShift = formData.get("return-shift");
+
+      const travelName = typeof rawTravelName === "string" ? rawTravelName.trim() : "";
+      const departDate = typeof rawDepart === "string" ? rawDepart : "";
+      const departOrigin = typeof rawDepartOrigin === "string" ? rawDepartOrigin.trim() : "";
+      const departDestination = typeof rawDepartDestination === "string" ? rawDepartDestination.trim() : "";
+      const departShiftValue = typeof rawDepartShift === "string" ? rawDepartShift : "";
+      const returnDate = typeof rawReturn === "string" ? rawReturn : "";
+      const returnOrigin = typeof rawReturnOrigin === "string" ? rawReturnOrigin.trim() : "";
+      const returnDestination = typeof rawReturnDestination === "string" ? rawReturnDestination.trim() : "";
+      const returnShiftValue = typeof rawReturnShift === "string" ? rawReturnShift : "";
+  // travel observations are read but not sent in this simulation
+
+      if (!travelName) {
+        alert("Por favor informe o nome para a passagem.");
+        return;
+      }
+
+      if (!departDate) {
+        alert("Por favor informe a data de ida.");
+        return;
+      }
+
+      if (!departOrigin || !departDestination) {
+        alert("Por favor informe origem e destino da viagem de ida.");
+        return;
+      }
+
+      if (!departShiftValue) {
+        alert("Por favor selecione o turno da viagem de ida.");
+        return;
+      }
+
+      if (returnDate && (!returnOrigin || !returnDestination || !returnShiftValue)) {
+        alert("Se informar data de volta, preencha origem/destino/turno da volta.");
+        return;
+      }
+
+      alert("Solicitação enviada com passagem (simulada). Redirecionando para pagamento...");
+      router.push(`/payment`);
+      return;
+    }
+
+    router.push(`/payment`);
   };
 
-  const handleTravelSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-
-    const rawName = formData.get("travel-name");
-    const rawDepart = formData.get("depart-date");
-    const rawDepartOrigin = formData.get("depart-origin");
-    const rawDepartDestination = formData.get("depart-destination");
-    const rawDepartShift = formData.get("depart-shift");
-    const rawReturn = formData.get("return-date");
-    const rawReturnOrigin = formData.get("return-origin");
-    const rawReturnDestination = formData.get("return-destination");
-    const rawReturnShift = formData.get("return-shift");
-    const rawObs = formData.get("travel-observations");
-
-    const name = typeof rawName === "string" ? rawName.trim() : "";
-    const departDate = typeof rawDepart === "string" ? rawDepart : "";
-    const departOrigin = typeof rawDepartOrigin === "string" ? rawDepartOrigin.trim() : "";
-    const departDestination = typeof rawDepartDestination === "string" ? rawDepartDestination.trim() : "";
-    const departShiftValue = typeof rawDepartShift === "string" ? rawDepartShift : "";
-    const returnDate = typeof rawReturn === "string" ? rawReturn : "";
-    const returnOrigin = typeof rawReturnOrigin === "string" ? rawReturnOrigin.trim() : "";
-    const returnDestination = typeof rawReturnDestination === "string" ? rawReturnDestination.trim() : "";
-    const returnShiftValue = typeof rawReturnShift === "string" ? rawReturnShift : "";
-    const observations = typeof rawObs === "string" ? rawObs.trim() : "";
-
-    if (!name) {
-      alert("Por favor informe o nome para a passagem.");
-      return;
-    }
-
-    if (!departDate) {
-      alert("Por favor informe a data de ida.");
-      return;
-    }
-
-    if (!departOrigin || !departDestination) {
-      alert("Por favor informe origem e destino da viagem de ida.");
-      return;
-    }
-
-    if (!departShiftValue) {
-      alert("Por favor selecione o turno da viagem de ida.");
-      return;
-    }
-
-    // Se informou data de volta, validar os campos de volta
-    if (returnDate && (!returnOrigin || !returnDestination || !returnShiftValue)) {
-      alert("Se informar data de volta, preencha origem/destino/turno da volta.");
-      return;
-    }
-
-    const travel: TravelRequestData = {
-      name,
-      departDate,
-      departOrigin,
-      departDestination,
-      departShift: departShiftValue,
-      returnDate: returnDate || undefined,
-      returnOrigin: returnOrigin || undefined,
-      returnDestination: returnDestination || undefined,
-      returnShift: returnShiftValue || undefined,
-      observations: observations || undefined,
-    };
-
-    setTravelData(travel);
-    // Aqui poderia enviar para uma API. Por enquanto apenas confirmar.
-    alert("Solicitação de passagem criada com sucesso (simulada).");
-    router.push("/dashboard");
-  };
+  
 
   return (
     <div>
@@ -328,27 +300,30 @@ export default function RequestForm({
               <div className="space-y-6">
                 <div className="grid w-full items-center gap-2">
                   <Label htmlFor="name">Nome completo</Label>
-                  <Input type="text" id="name" name="name" required />
+                  <Input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value={nameState}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNameState(e.target.value)}
+                    required
+                  />
                 </div>
-                <div className="grid w-full items-center gap-2">
-                  <Label htmlFor="birth-date">Data de nascimento</Label>
-                  <Input type="date" id="birth-date" name="birth-date" required />
-                </div>
-
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="grid w-full items-center gap-2">
-                    <Label htmlFor="cpf">CPF</Label>
-                    <Input
-                      type="text"
-                      id="cpf"
-                      name="cpf"
-                      placeholder="000.000.000-00"
-                      required
-                    />
+                  <Label htmlFor="birth-date">Data de nascimento</Label>
+                  <Input type="date" id="birth-date" name="birth-date" required />
                   </div>
+
                   <div className="grid w-full items-center gap-2">
-                    <Label htmlFor="rg">RG</Label>
-                    <Input type="text" id="rg" name="rg" placeholder="0000000000" required />
+                  <Label htmlFor="cpf">CPF</Label>
+                  <Input
+                    type="text"
+                    id="cpf"
+                    name="cpf"
+                    placeholder="000.000.000-00"
+                    required
+                  />
                   </div>
                 </div>
 
@@ -424,46 +399,38 @@ export default function RequestForm({
                   <Textarea id="observations" name="observations" placeholder="Alguma observação adicional (opcional)" />
                 </div>
 
-                <div className="pt-4">
-                  <Button type="submit" className="w-full">
-                    Enviar
+                <div className="mt-4 p-4 border rounded">
+                  <p className="mb-3">Deseja também fazer a solicitação de viagem?</p>
+                  <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    onClick={() => setShowTravelForm(true)}
+                  >
+                    Sim
                   </Button>
-                </div>
-
-                {showTravelPrompt && !showTravelForm && (
-                  <div className="mt-4 p-4 border rounded">
-                    <p className="mb-3">Deseja também fazer a solicitação de viagem?</p>
-                    <div className="flex gap-2">
-                      <Button
-                        onClick={() => setShowTravelForm(true)}
-                      >
-                        Sim
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        onClick={() => {
-                          // Finalizar sem solicitar viagem: API com o banco de dados
-                          alert("Dados enviados com sucesso!");
-                          router.push("/dashboard");
-                        }}
-                      >
-                        Não
-                      </Button>
-                    </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => setShowTravelForm(false)}
+                  >
+                    Não
+                  </Button>
                   </div>
-                )}
+                </div>
 
                 {showTravelForm && (
                   <div className="mt-4 p-4 border rounded">
                     <p className="mb-3 font-medium">Formulário de solicitação de viagem</p>
-                    <form onSubmit={handleTravelSubmit} className="space-y-4">
+
+                    <div className="space-y-4">
                       <div className="grid w-full items-center gap-2">
                         <Label htmlFor="travel-name">Nome completo</Label>
                         <Input
                           type="text"
                           id="travel-name"
                           name="travel-name"
-                          defaultValue={submittedData?.name || ""}
+                          value={nameState}
+                          readOnly
                           required
                         />
                       </div>
@@ -499,11 +466,33 @@ export default function RequestForm({
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="grid w-full items-center gap-2">
                           <Label htmlFor="depart-origin">Origem (ida)</Label>
-                          <Input type="text" id="depart-origin" name="depart-origin" placeholder="Cidade / Aeroporto" required />
+                          <Input
+                            type="text"
+                            id="depart-origin"
+                            name="depart-origin"
+                            placeholder="Cidade / Aeroporto"
+                            required
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                              const v = e.target.value;
+                              setDepartOriginState(v);
+                              autoFillReturnIfAppropriate(v, departDestinationState);
+                            }}
+                          />
                         </div>
                         <div className="grid w-full items-center gap-2">
                           <Label htmlFor="depart-destination">Destino (ida)</Label>
-                          <Input type="text" id="depart-destination" name="depart-destination" placeholder="Cidade / Aeroporto" required />
+                          <Input
+                            type="text"
+                            id="depart-destination"
+                            name="depart-destination"
+                            placeholder="Cidade / Aeroporto"
+                            required
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                              const v = e.target.value;
+                              setDepartDestinationState(v);
+                              autoFillReturnIfAppropriate(departOriginState, v);
+                            }}
+                          />
                         </div>
                       </div>
 
@@ -538,11 +527,23 @@ export default function RequestForm({
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="grid w-full items-center gap-2">
                           <Label htmlFor="return-origin">Origem (volta)</Label>
-                          <Input type="text" id="return-origin" name="return-origin" placeholder="Cidade / Aeroporto" />
+                          <Input
+                            type="text"
+                            id="return-origin"
+                            name="return-origin"
+                            placeholder="Cidade / Aeroporto"
+                            onChange={() => setReturnEdited(true)}
+                          />
                         </div>
                         <div className="grid w-full items-center gap-2">
                           <Label htmlFor="return-destination">Destino (volta)</Label>
-                          <Input type="text" id="return-destination" name="return-destination" placeholder="Cidade / Aeroporto" />
+                          <Input
+                            type="text"
+                            id="return-destination"
+                            name="return-destination"
+                            placeholder="Cidade / Aeroporto"
+                            onChange={() => setReturnEdited(true)}
+                          />
                         </div>
                       </div>
 
@@ -550,22 +551,15 @@ export default function RequestForm({
                         <Label htmlFor="travel-observations">Observações</Label>
                         <Textarea id="travel-observations" name="travel-observations" placeholder="Observações sobre a viagem (opcional)" />
                       </div>
-
-                      <div className="flex gap-2 pt-2">
-                        <Button type="submit">Solicitar passagem</Button>
-                        <Button
-                          variant="ghost"
-                          onClick={() => {
-                            setShowTravelForm(false);
-                            // opcional: manter prompt visível para enviar sem viagem
-                          }}
-                        >
-                          Cancelar
-                        </Button>
-                      </div>
-                    </form>
+                    </div>
                   </div>
                 )}
+
+                <div className="pt-4">
+                  <Button type="submit" className="w-full">
+                    Enviar
+                  </Button>
+                </div>
               </div>
             </form>
           </CardContent>
