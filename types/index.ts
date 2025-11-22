@@ -29,3 +29,29 @@ export interface Request {
   specialRequests: string;
   status: 'Pendente' | 'Aprovada' | 'Rejeitada';
 }
+
+export interface ValoresDiaria {
+  individual: number;
+  duplo: number;
+  convidado: number;
+  diariasCobertas: number;
+}
+
+export interface NewEvent {
+  id?: number;
+  name: string;
+  startDate: string;
+  endDate: string;
+  local: string;
+  description: string;
+  finalRequestDate: string;
+  
+  valores: {
+    diretoria: ValoresDiaria;
+    conselho: ValoresDiaria;
+    comissaoEdu: ValoresDiaria;
+    secretarioRegional: ValoresDiaria;
+    cooComissaoEsp: ValoresDiaria;
+    outros: ValoresDiaria;
+  };
+}
