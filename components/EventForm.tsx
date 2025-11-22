@@ -18,12 +18,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
-// 1. Definimos a interface das propriedades que o componente aceita
 interface EventFormProps {
-  initialData?: NewEvent; // Opcional: Se vier, é EDIÇÃO. Se não, é CRIAÇÃO.
+  initialData?: NewEvent; 
 }
 
-// 2. Valores padrão para quando for criar um NOVO evento
 const defaultValues: NewEvent = {
   id: 0,
   name: "",
@@ -45,10 +43,8 @@ const defaultValues: NewEvent = {
 export default function EventForm({ initialData }: EventFormProps) {
   const router = useRouter();
 
-  // Variável para saber se estamos editando (ajuda nos textos da tela)
   const isEditing = !!initialData;
 
-  // 3. Inicializamos o estado com os dados recebidos OU os valores padrão
   const [formData, setFormData] = useState<NewEvent>(initialData || defaultValues);
 
   const handleBasicChange = (
@@ -100,11 +96,6 @@ export default function EventForm({ initialData }: EventFormProps) {
     if (isNaN(fim.getTime())) { alert("Data de fim inválida."); return; }
     if (isNaN(limite.getTime())) { alert("Data limite inválida."); return; }
     
-    // Nota: Removi a validação de "inicio < hoje" para permitir editar eventos passados ou em andamento,
-    // mas você pode descomentar se quiser bloquear:
-    // if (!isEditing && inicio < hoje) { alert("A data do evento não pode ser anterior à data atual."); return; }
-
-    // Validação dos Valores
     for (const categoria in formData.valores) {
       const catKey = categoria as keyof typeof formData.valores;
       const valoresCat = formData.valores[catKey];
@@ -114,13 +105,10 @@ export default function EventForm({ initialData }: EventFormProps) {
       }
     }
 
-    // Simulação do envio
     console.log(isEditing ? "Atualizando evento:" : "Criando evento:", formData);
     
     alert("Salvo com sucesso! (Simulação)");
     
-    // Redireciona de volta
-    // Se editou, volta para os detalhes do evento. Se criou, volta para a lista.
     if (isEditing) {
         router.push(`/admin/eventos/${formData.id}`);
     } else {
@@ -205,7 +193,6 @@ export default function EventForm({ initialData }: EventFormProps) {
 
           <div className="flex justify-end pt-4 gap-4">
             <Button variant="outline" type="button" asChild>
-              {/* Se estiver editando, volta para o detalhe do ID. Se criando, volta para a lista. */}
               <Link href={isEditing ? `/admin/eventos/${formData.id}` : "/admin/eventos"}>
                 Cancelar
               </Link>
