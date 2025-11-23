@@ -123,7 +123,7 @@ export default function ManageRequestsPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Solicitações Pendentes</h1>
           <p className="text-muted-foreground text-sm">
-            Gerenciamento rápido
+            Gerenciamento Solicitações
           </p>
         </div>
       </div>
