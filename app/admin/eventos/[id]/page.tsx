@@ -229,7 +229,7 @@ export default async function EventDetailsPage({ params }: EventDetailsPageProps
               <Button asChild variant="outline" className="justify-start h-12 w-full hover:bg-blue-50 hover:text-blue-700 border-gray-200">
                 <Link href={`/admin/eventos/${event.id}/editar`}>
                   <Edit className="mr-3 h-4 w-4 text-blue-600" />
-                  Editar Dados
+                  Editar Evento
                 </Link>
               </Button>
 
@@ -246,9 +246,7 @@ export default async function EventDetailsPage({ params }: EventDetailsPageProps
                     <ClipboardList className="mr-3 h-4 w-4 text-orange-600" />
                     Solicitações
                   </div>
-                  <span className="bg-orange-100 text-orange-700 text-xs font-bold px-2 py-0.5 rounded-full group-hover:bg-orange-200">
-                    3
-                  </span>
+
                 </Link>
               </Button>
 

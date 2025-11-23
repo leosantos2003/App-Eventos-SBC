@@ -77,7 +77,6 @@ export default async function AdminDashboard() {
           ))}
         </div>
       ) : (
-        // Estado Vazio (Caso não tenha nenhum evento)
         <div className="flex flex-col items-center justify-center py-20 border-2 border-dashed rounded-lg text-center">
             <p className="text-lg text-muted-foreground mb-4">Nenhum evento encontrado.</p>
             <Button variant="outline" asChild>

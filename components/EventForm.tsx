@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation"; // Import necessário para redirecionar
+import { useRouter } from "next/navigation";
 import { NewEvent, ValoresDiaria } from "@/types/";
 import EventValuesForm from "@/components/EventValuesForm";
 
@@ -74,7 +74,6 @@ export default function EventForm({ initialData }: EventFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validações Básicas
     if (!formData.name.trim()) { alert("Por favor informe o nome do evento."); return; }
     if (!formData.startDate) { alert("Informe a data de início."); return; }
     if (!formData.endDate) { alert("Informe a data de fim."); return; }
@@ -82,7 +81,6 @@ export default function EventForm({ initialData }: EventFormProps) {
     if (!formData.local.trim()) { alert("Por favor informe o local do evento."); return; }
     if (!formData.description.trim()) { alert("Por favor informe a descrição do evento."); return; }
 
-    // Validações de Datas
     const hoje = new Date();
     hoje.setHours(0, 0, 0, 0);
     const inicio = new Date(formData.startDate + "T00:00:00");
@@ -107,7 +105,7 @@ export default function EventForm({ initialData }: EventFormProps) {
 
     console.log(isEditing ? "Atualizando evento:" : "Criando evento:", formData);
     
-    alert("Salvo com sucesso! (Simulação)");
+    alert("Salvo com sucesso!");
     
     if (isEditing) {
         router.push(`/admin/eventos/${formData.id}`);

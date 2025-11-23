@@ -7,7 +7,7 @@ const CATEGORIAS_DIARIAS = [
   { key: 'conselho', label: 'Membro do Conselho' },
   { key: 'comissaoEdu', label: 'Comissão de Educação' },
   { key: 'secretarioRegional', label: 'Secretário Regional' },
-  { key: 'cooComissaoEsp', label: 'Coord. Com. Especial' },
+  { key: 'cooComissaoEsp', label: 'Coordenador Comissão Especial' },
   { key: 'outros', label: 'Outros' },
 ] as const;
 
