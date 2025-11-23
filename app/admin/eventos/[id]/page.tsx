@@ -272,10 +272,8 @@ export default async function EventDetailsPage({ params }: EventDetailsPageProps
               <Separator className="my-2" />
 
               <Button className="justify-start h-12 w-full bg-slate-900 hover:bg-slate-800 text-white">
-                <Link href={`/admin/eventos/${event.id}/relatorio`} className="flex items-center w-full">
-                    <FileBarChart className="mr-3 h-4 w-4" />
-                    Relatório Final
-                </Link>
+                  <FileBarChart className="mr-3 h-4 w-4" />
+                  Relatório Final
               </Button>
 
             </CardContent>
