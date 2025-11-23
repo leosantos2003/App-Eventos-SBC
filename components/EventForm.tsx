@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { NewEvent, ValoresDiaria } from "@/types/";
+import { NewEvent, ValoresDiaria, local as LocalInterface } from "@/types/"; // Certifique-se que o 'local' está exportado em types
 import EventValuesForm from "@/components/EventValuesForm";
 
 import {
@@ -22,14 +22,29 @@ interface EventFormProps {
   initialData?: NewEvent; 
 }
 
+const formatDateForInput = (date: Date | string | undefined): string => {
+  if (!date) return "";
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return "";
+  return d.toISOString().split('T')[0];
+};
+
 const defaultValues: NewEvent = {
-  id: 0,
+  id: -1,
   name: "",
-  startDate: "",
-  endDate: "",
-  local: "",
+  startDate: new Date(), 
+  endDate: new Date(),
+  local: {
+    id: 0,
+    nome: "",
+    rua: "",
+    cidade: "",
+    estado: "",
+    pais: "",
+    complemento: ""
+  },
   description: "",
-  finalRequestDate: "",
+  finalRequestDate: new Date(),
   valores: {
     diretoria: { individual: 0, duplo: 0, convidado: 0, diariasCobertas: 0 },
     conselho: { individual: 0, duplo: 0, convidado: 0, diariasCobertas: 0 },
@@ -42,7 +57,6 @@ const defaultValues: NewEvent = {
 
 export default function EventForm({ initialData }: EventFormProps) {
   const router = useRouter();
-
   const isEditing = !!initialData;
 
   const [formData, setFormData] = useState<NewEvent>(initialData || defaultValues);
@@ -51,7 +65,23 @@ export default function EventForm({ initialData }: EventFormProps) {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    
+    if (name === 'startDate' || name === 'endDate' || name === 'finalRequestDate') {
+        setFormData((prev) => ({ ...prev, [name]: new Date(value) }));
+    } else {
+        setFormData((prev) => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const handleLocalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      local: {
+        ...prev.local,
+        [name]: value,
+      },
+    }));
   };
 
   const handleValuesChange = (
@@ -75,25 +105,29 @@ export default function EventForm({ initialData }: EventFormProps) {
     e.preventDefault();
 
     if (!formData.name.trim()) { alert("Por favor informe o nome do evento."); return; }
-    if (!formData.startDate) { alert("Informe a data de início."); return; }
-    if (!formData.endDate) { alert("Informe a data de fim."); return; }
-    if (!formData.finalRequestDate) { alert("Por favor informe a data limite para pedidos."); return; }
-    if (!formData.local.trim()) { alert("Por favor informe o local do evento."); return; }
+    
+    if (!formData.local.nome.trim()) { alert("Por favor informe o nome do local."); return; }
+    if (!formData.local.rua.trim()) { alert("Por favor informe a rua."); return; }
+    if (!formData.local.cidade.trim()) { alert("Por favor informe a cidade."); return; }
+    if (!formData.local.estado.trim()) { alert("Por favor informe o estado."); return; }
+    if (!formData.local.pais.trim()) { alert("Por favor informe o país."); return; }
+
     if (!formData.description.trim()) { alert("Por favor informe a descrição do evento."); return; }
 
     const hoje = new Date();
     hoje.setHours(0, 0, 0, 0);
-    const inicio = new Date(formData.startDate + "T00:00:00");
-    const fim = new Date(formData.endDate + "T00:00:00");
-    const limite = new Date(formData.finalRequestDate + "T00:00:00");
-
-    if (fim < inicio) { alert("A data de fim não pode ser menor que a de início."); return; }
-    if (limite > inicio) { alert("A data limite de pedidos deve ser antes do evento começar."); return; }
+    
+    const inicio = new Date(formData.startDate);
+    const fim = new Date(formData.endDate);
+    const limite = new Date(formData.finalRequestDate);
 
     if (isNaN(inicio.getTime())) { alert("Data de início inválida."); return; }
     if (isNaN(fim.getTime())) { alert("Data de fim inválida."); return; }
     if (isNaN(limite.getTime())) { alert("Data limite inválida."); return; }
-    
+
+    if (fim < inicio) { alert("A data de fim não pode ser menor que a de início."); return; }
+    if (limite > inicio) { alert("A data limite de pedidos deve ser antes do evento começar."); return; }
+
     for (const categoria in formData.valores) {
       const catKey = categoria as keyof typeof formData.valores;
       const valoresCat = formData.valores[catKey];
@@ -123,7 +157,7 @@ export default function EventForm({ initialData }: EventFormProps) {
         <p className="text-sm text-muted-foreground">
           {isEditing 
             ? "Altere as informações abaixo e salve para atualizar o evento."
-            : "Preencha as informações do evento e os valores das diárias."}
+            : "Preencha as informações do evento, dados do local e os valores das diárias."}
         </p>
       </CardHeader>
 
@@ -131,7 +165,7 @@ export default function EventForm({ initialData }: EventFormProps) {
         <form onSubmit={handleSubmit} className="space-y-10">
           
           <div className="space-y-6">
-            <h2 className="text-lg font-semibold">Informações do Evento</h2>
+            <h2 className="text-lg font-semibold">Informações Gerais</h2>
             <Separator />
 
             <div className="space-y-2">
@@ -140,13 +174,12 @@ export default function EventForm({ initialData }: EventFormProps) {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              
               <div className="space-y-2">
                 <Label>Data de Início</Label>
                 <Input 
                   type="date" 
                   name="startDate" 
-                  value={formData.startDate} 
+                  value={formatDateForInput(formData.startDate)} 
                   onChange={handleBasicChange} 
                 />
               </div>
@@ -156,7 +189,7 @@ export default function EventForm({ initialData }: EventFormProps) {
                 <Input 
                   type="date" 
                   name="endDate" 
-                  value={formData.endDate} 
+                  value={formatDateForInput(formData.endDate)} 
                   onChange={handleBasicChange} 
                 />
               </div>
@@ -166,20 +199,95 @@ export default function EventForm({ initialData }: EventFormProps) {
                 <Input 
                   type="date" 
                   name="finalRequestDate" 
-                  value={formData.finalRequestDate} 
+                  value={formatDateForInput(formData.finalRequestDate)} 
                   onChange={handleBasicChange} 
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label>Local</Label>
-              <Input type="text" name="local" value={formData.local} onChange={handleBasicChange} />
-            </div>
-
-            <div className="space-y-2">
               <Label>Descrição</Label>
-              <Textarea name="description" value={formData.description} onChange={handleBasicChange} placeholder="Informe uma descrição breve do evento" />
+              <Textarea 
+                name="description" 
+                value={formData.description} 
+                onChange={handleBasicChange} 
+                placeholder="Informe uma descrição breve do evento" 
+              />
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <h2 className="text-lg font-semibold">Localização</h2>
+            <Separator />
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Nome do Local (Hotel/Centro de Eventos)</Label>
+                <Input 
+                  type="text" 
+                  name="nome" 
+                  value={formData.local.nome as string} 
+                  onChange={handleLocalChange} 
+                  placeholder="Ex: Hotel Plaza São Rafael"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="md:col-span-2 space-y-2">
+                  <Label>Rua/Logradouro</Label>
+                  <Input 
+                    type="text" 
+                    name="rua" 
+                    value={formData.local.rua as string} 
+                    onChange={handleLocalChange} 
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>Complemento (Opcional)</Label>
+                  <Input 
+                    type="text" 
+                    name="complemento" 
+                    value={formData.local.complemento as string} 
+                    onChange={handleLocalChange} 
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label>Cidade</Label>
+                  <Input 
+                    type="text" 
+                    name="cidade" 
+                    value={formData.local.cidade as string} 
+                    onChange={handleLocalChange} 
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Estado</Label>
+                  <Input 
+                    type="text" 
+                    name="estado" 
+                    value={formData.local.estado as string} 
+                    onChange={handleLocalChange} 
+                    maxLength={2}
+                    placeholder="UF"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>País</Label>
+                  <Input 
+                    type="text" 
+                    name="pais" 
+                    value={formData.local.pais as string} 
+                    onChange={handleLocalChange} 
+                    defaultValue="Brasil"
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
