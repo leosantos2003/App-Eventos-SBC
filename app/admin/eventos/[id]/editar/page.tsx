@@ -9,11 +9,19 @@ const MOCK_DB = [
   {
     id: 1,
     name: "Congresso Brasileiro de Software 2025",
-    startDate: "2025-10-20",
-    endDate: "2025-10-24",
-    local: "Centro de Convenções PUCRS, Porto Alegre",
+    startDate: new Date("2025-10-20T00:00:00"),
+    endDate: new Date("2025-10-24T00:00:00"),
+    local: {
+        id: 1,
+        nome: "Centro de Convenções PUCRS",
+        rua: "Av. Ipiranga, 6681",
+        cidade: "Porto Alegre",
+        estado: "RS",
+        pais: "Brasil",
+        complemento: "Prédio 40"
+    },
     description: "O CBSoft é um dos principais eventos...",
-    finalRequestDate: "2025-10-10",
+    finalRequestDate: new Date("2025-10-10T00:00:00"),
     valores: {
       diretoria: { individual: 150, duplo: 250, convidado: 100, diariasCobertas: 4 },
       conselho: { individual: 100, duplo: 200, convidado: 80, diariasCobertas: 3 },

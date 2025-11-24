@@ -37,14 +37,24 @@ export interface ValoresDiaria {
   diariasCobertas: number;
 }
 
+export interface local{
+  id?: number;
+  nome: String;
+  rua: String;
+  cidade: String;
+  estado: String;
+  pais: String;
+  complemento: String;
+}
+
 export interface NewEvent {
   id?: number;
   name: string;
-  startDate: string;
-  endDate: string;
-  local: string;
+  startDate: Date;
+  endDate: Date;
+  local: local;
   description: string;
-  finalRequestDate: string;
+  finalRequestDate: Date;
   
   valores: {
     diretoria: ValoresDiaria;

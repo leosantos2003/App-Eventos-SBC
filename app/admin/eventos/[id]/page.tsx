@@ -27,18 +27,28 @@ import {
   CheckCircle2
 } from "lucide-react";
 
-const MOCK_EVENTO = {
+import { NewEvent } from "@/types/";
+
+const MOCK_EVENTO: NewEvent = {
   id: 1,
   name: "Congresso Brasileiro de Software 2025",
-  startDate: "2025-10-20", 
-  endDate: "2025-10-24",   
-  local: "Centro de Convenções PUCRS, Porto Alegre",
+  startDate: new Date("2025-10-20T00:00:00"), 
+  endDate: new Date("2025-10-24T00:00:00"),   
+  local: {
+    id: 1,
+    nome: "Centro de Convenções PUCRS",
+    rua: "Av. Ipiranga, 6681",
+    cidade: "Porto Alegre",
+    estado: "RS",
+    pais: "Brasil",
+    complemento: "Prédio 40"
+  },
   description: `O CBSoft é um dos principais eventos da Sociedade Brasileira de Computação.
   
   O evento contará com trilhas de Engenharia de Software, Sistemas de Informação e diversas palestras internacionais.
   
   Contamos com a presença de todos os associados.`,
-  finalRequestDate: "2025-10-10",
+  finalRequestDate: new Date("2025-10-10T00:00:00"),
   
   valores: {
     diretoria: { individual: 150, duplo: 250, convidado: 100, diariasCobertas: 4 },
@@ -55,17 +65,16 @@ async function getEventByIdMock(id: string) {
   return { ...MOCK_EVENTO, id: Number(id) };
 }
 
-function getEventStatus(startDate: string, endDate: string) {
+function getEventStatus(start: Date, end: Date) {
   const now = new Date();
   now.setHours(0, 0, 0, 0);
-  
-  const start = new Date(startDate + "T00:00:00");
-  const end = new Date(endDate + "T00:00:00");
+  const startZero = new Date(start); startZero.setHours(0,0,0,0);
+  const endZero = new Date(end); endZero.setHours(0,0,0,0);
 
-  if (now > end) {
+  if (now > endZero) {
     return { label: "Encerrado", color: "bg-gray-100 text-gray-600", icon: CheckCircle2 };
   }
-  if (now >= start && now <= end) {
+  if (now >= startZero && now <= endZero) {
     return { label: "Em Andamento", color: "bg-green-100 text-green-700", icon: Clock };
   }
   return { label: "Em Breve", color: "bg-blue-100 text-blue-700", icon: CalendarClock };
@@ -83,8 +92,8 @@ const formatCategoria = (key: string) => {
   return map[key] || key;
 };
 
-const formatDate = (dateString: string) => {
-    return new Date(dateString + "T00:00:00").toLocaleDateString('pt-BR');
+const formatDate = (date: Date) => {
+    return date.toLocaleDateString('pt-BR');
 };
 
 interface EventDetailsPageProps {
@@ -131,7 +140,9 @@ export default async function EventDetailsPage({ params }: EventDetailsPageProps
             </div>
             <div className="flex items-center gap-1.5">
               <MapPinIcon className="h-4 w-4" />
-              <span>{event.local}</span>
+              <span>
+                {event.local.nome} • {event.local.cidade}/{event.local.estado}
+              </span>
             </div>
           </div>
         </div>
@@ -149,6 +160,15 @@ export default async function EventDetailsPage({ params }: EventDetailsPageProps
                     <p className="leading-relaxed text-gray-700 whitespace-pre-line">
                         {event.description}
                     </p>
+                    
+                    <div className="mt-6 p-4 bg-gray-50 rounded-lg text-sm border">
+                        <h4 className="font-semibold text-gray-900 flex items-center gap-2 mb-2">
+                            <MapPinIcon className="h-4 w-4" /> Localização 
+                        </h4>
+                        <p>{event.local.nome}</p>
+                        <p>{event.local.rua}{event.local.complemento ? `, ${event.local.complemento}` : ''}</p>
+                        <p>{event.local.cidade} - {event.local.estado}, {event.local.pais}</p>
+                    </div>
                 </CardContent>
             </Card>
 
@@ -246,17 +266,14 @@ export default async function EventDetailsPage({ params }: EventDetailsPageProps
                     <ClipboardList className="mr-3 h-4 w-4 text-orange-600" />
                     Solicitações
                   </div>
-
                 </Link>
               </Button>
 
               <Separator className="my-2" />
 
               <Button className="justify-start h-12 w-full bg-slate-900 hover:bg-slate-800 text-white">
-                <Link href={`/admin/eventos/${event.id}/relatorio`} className="flex items-center w-full">
-                    <FileBarChart className="mr-3 h-4 w-4" />
-                    Relatório Final
-                </Link>
+                  <FileBarChart className="mr-3 h-4 w-4" />
+                  Relatório Final
               </Button>
 
             </CardContent>
