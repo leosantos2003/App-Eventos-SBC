@@ -3,6 +3,7 @@ const BASE_URL = `http://localhost:${PORT}`
 
 export const Routes = Object.freeze({
   users: `${BASE_URL}/users/`,
+  me: `${BASE_URL}/me/`,
   token: `${BASE_URL}/token/`,
   user: (cpf: string) => `${BASE_URL}/users/${cpf}/`,
   events: `${BASE_URL}/events/`,

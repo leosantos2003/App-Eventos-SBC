@@ -19,11 +19,14 @@ import {
 } from "lucide-react";
 import { ModeToggle } from "@/components/mode-toggle";
 import { Header } from "@/components/ui/header";
+import { executeRequest } from "../api/requestExecutor";
+import { User } from "@/types";
 
 // Função para buscar todos os eventos de um usuário
-const getUserEventsData = (userCpf: number) => {
-  const user = users.find((u) => u.cpf === userCpf);
-  const userEventLinks = userEvents.filter((ue) => ue.userId === userCpf);
+const getUserEventsData = () => {
+  const userEmail = 'aaa'
+  const user = users.find((u) => u.email === userEmail);
+  const userEventLinks = userEvents.filter((ue) => ue.email === userEmail);
   const userEventsDetails = userEventLinks
     .map((link) => {
       return events.find((event) => event.id === link.eventId);
@@ -33,9 +36,17 @@ const getUserEventsData = (userCpf: number) => {
   return { user, userEvents: userEventsDetails as typeof events };
 };
 
-export default function UserDashboard() {
+export default async function UserDashboard() {
+  const token = localStorage.getItem("access");
+
+  const user = await executeRequest<User>("/me/", {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+
   const userId = 1; // Simula o ID do usuário logado
-  const { user, userEvents } = getUserEventsData(userId);
+  // const { user, userEvents } = getUserEventsData(userId);
 
   if (!user) {
     return (
