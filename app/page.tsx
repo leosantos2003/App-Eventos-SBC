@@ -1,15 +1,11 @@
 import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ModeToggle } from "@/components/mode-toggle";
-import { Header } from "@/components/ui/header";
 import Link from "next/link";
 
 export default function LoginPage() {

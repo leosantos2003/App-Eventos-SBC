@@ -55,7 +55,7 @@ export default function EventRequestsPage({
       {eventRequests.length > 0 ? (
         <div className="space-y-6">
           {eventRequests.map((request) => {
-            const user = users.find((u) => u.id === request.userId);
+            const user = users.find((u) => u.email === request.userEmail);
             return (
               <Card key={request.id}>
                 <CardHeader>
@@ -64,7 +64,6 @@ export default function EventRequestsPage({
                       <CardTitle>Solicitação de {user?.name}</CardTitle>
                       <CardDescription>{user?.email}</CardDescription>
                     </div>
-                    {/* Use o componente Badge com variantes */}
                     <Badge variant={getBadgeVariant(request.status)}>
                       {request.status}
                     </Badge>
