@@ -1,7 +1,7 @@
 export interface User {
-  cpf: number;
   name: string;
   email: string;
+  cpf: number;
   birthDate: string;
   password: string;
 }
@@ -21,7 +21,7 @@ export interface UserEvent {
 
 export interface Request {
   id: number;
-  userId: number;
+  userEmail: string;
   eventId: number;
   checkinDate: string;
   checkoutDate: string;

@@ -13,10 +13,9 @@ import { CalendarIcon, MapPinIcon, ChevronLeftIcon } from "lucide-react";
 export default function EventDetailsPage({
 	params,
 }: {
-	params: { eventId: string };
+	params: { eventId: number };
 }) {
-	const eventId = parseInt(params.eventId, 10);
-	const event = events.find((e) => e.id === eventId);
+	const event = events.find((e) => e.id === params.eventId);
 
 	if (!event) {
 		return (

@@ -346,6 +346,7 @@ export default function RequestForm({
                       <SelectItem value="Secretário regional">Secretário(a) regional</SelectItem>
                       <SelectItem value="Coordenador de comissão especial">Coordenador(a) de comissão especial</SelectItem>
                       <SelectItem value="Associado">Associado(a)</SelectItem>
+                      <SelectItem value="Outros">Outros</SelectItem>
                     </SelectContent>
                   </Select>
                   <input type="hidden" name="role" value={role} />
@@ -390,10 +391,24 @@ export default function RequestForm({
                   </div>
 
                   <div className="grid w-full items-center gap-2">
-                    <Label htmlFor="checkout-date">Data de check-out</Label>
-                    <Input type="date" id="checkout-date" name="checkout-date" required />
+                    <Label htmlFor="checkin-time-pref">Turno de Preferência</Label>
+                    <Input type="date" id="checkin-time-pref" name="checkin-time-pref" required />
                   </div>
                 </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid w-full items-center gap-2">
+                    <Label htmlFor="checkin-out">Data de check-out</Label>
+                    <Input type="date" id="checkout-date" name="checkout-date" required />
+                  </div>
+
+                  <div className="grid w-full items-center gap-2">
+                    <Label htmlFor="checkout-time-pref">Turno de Preferência</Label>
+                    <Input type="date" id="checkout-time-pref" name="checkout-time-pref" required />
+                  </div>
+                </div>
+
+
                 <div className="grid w-full items-center gap-2">
                   <Label htmlFor="observations">Observações extras</Label>
                   <Textarea id="observations" name="observations" placeholder="Alguma observação adicional (opcional)" />
