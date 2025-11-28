@@ -5,12 +5,12 @@ export const Routes = Object.freeze({
   users: `${BASE_URL}/users/`,
   me: `${BASE_URL}/me/`,
   token: `${BASE_URL}/token/`,
-  user: (cpf: string) => `${BASE_URL}/users/${cpf}/`,
+  user: (uuid: string) => `${BASE_URL}/users/${uuid}/`,
   events: `${BASE_URL}/events/`,
-  event: (id: number) => `${BASE_URL}/events/${id}/`,
+  event: (uuid: string) => `${BASE_URL}/events/${uuid}/`,
   requests: `${BASE_URL}/requests/`,
   requestsByEvent: (eventId: number) => `${BASE_URL}/requests?event=${eventId}`,
-  request: (userCpf: string, eventId: number) => `${BASE_URL}/requests?user=${userCpf}&event=${eventId}`
+  request: (uuid:string) => `${BASE_URL}/requests/${uuid}`
   // requestsReportXlsx: (q = "") => `/reports/requests.xlsx${q}`,
 
 });

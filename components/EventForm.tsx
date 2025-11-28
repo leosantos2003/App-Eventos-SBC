@@ -1,11 +1,11 @@
 "use client";
-
 import { useState } from "react";
-import Link from "next/link";
+import Link from "next/link"; // é necessário confia
 import { useRouter } from "next/navigation";
-import { NewEvent, ValoresDiaria, local as LocalInterface } from "@/types/"; // Certifique-se que o 'local' está exportado em types
+import { createEvent } from "@/lib/api/events";
+import { CreateEventPayload, PlacePayload, DailyValuesPayload } from "@/types/index";
+import { Role, RoleLabels } from "@/constants/roles";
 import EventValuesForm from "@/components/EventValuesForm";
-
 import {
   Card,
   CardHeader,
@@ -17,135 +17,114 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { createEmptyRoleCost, createEmptyPlace } from "@/lib/utils";
 
 interface EventFormProps {
-  initialData?: NewEvent; 
+  initialData?: CreateEventPayload;
 }
 
-const formatDateForInput = (date: Date | string | undefined): string => {
-  if (!date) return "";
-  const d = new Date(date);
-  if (isNaN(d.getTime())) return "";
-  return d.toISOString().split('T')[0];
+const formatDateForInput = (value: string | Date | undefined) => {
+  if (value) {
+    const date = new Date(value);
+    if (!isNaN(date.getTime())) {
+      return date.toISOString().split("T")[0];
+    }
+  }
+  return "";
 };
 
-const defaultValues: NewEvent = {
-  id: -1,
+const defaultValues: CreateEventPayload = {
   name: "",
-  startDate: new Date(), 
-  endDate: new Date(),
-  local: {
-    id: 0,
-    nome: "",
-    rua: "",
-    cidade: "",
-    estado: "",
-    pais: "",
-    complemento: ""
-  },
+  start_date: "",
+  end_date: "",
+  confirmation_limit_date: "",
   description: "",
-  finalRequestDate: new Date(),
-  valores: {
-    diretoria: { individual: 0, duplo: 0, convidado: 0, diariasCobertas: 0 },
-    conselho: { individual: 0, duplo: 0, convidado: 0, diariasCobertas: 0 },
-    comissaoEdu: { individual: 0, duplo: 0, convidado: 0, diariasCobertas: 0 },
-    secretarioRegional: { individual: 0, duplo: 0, convidado: 0, diariasCobertas: 0 },
-    cooComissaoEsp: { individual: 0, duplo: 0, convidado: 0, diariasCobertas: 0 },
-    outros: { individual: 0, duplo: 0, convidado: 0, diariasCobertas: 0 },
-  },
+  place: createEmptyPlace(),
+  role_costs: [
+    createEmptyRoleCost(Role.DIRECTORY_MEMBER),
+    createEmptyRoleCost(Role.COUNCIL_MEMBER),
+    createEmptyRoleCost(Role.EDUCATION_COMMISSION),
+    createEmptyRoleCost(Role.REGIONAL_SECRETARY),
+    createEmptyRoleCost(Role.SPECIAL_COMMISSION_COORDINATOR),
+    createEmptyRoleCost(Role.OTHERS),
+  ],
 };
 
 export default function EventForm({ initialData }: EventFormProps) {
   const router = useRouter();
   const isEditing = !!initialData;
 
-  const [formData, setFormData] = useState<NewEvent>(initialData || defaultValues);
+  const [formData, setFormData] = useState<CreateEventPayload>(
+    initialData || defaultValues
+  );
 
   const handleBasicChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    
-    if (name === 'startDate' || name === 'endDate' || name === 'finalRequestDate') {
-        setFormData((prev) => ({ ...prev, [name]: new Date(value) }));
-    } else {
-        setFormData((prev) => ({ ...prev, [name]: value }));
-    }
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleLocalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      local: {
-        ...prev.local,
-        [name]: value,
-      },
-    }));
-  };
-
-  const handleValuesChange = (
-    categoria: keyof NewEvent["valores"],
-    tipo: keyof ValoresDiaria,
-    valor: string
+  const handlePlaceChange = (
+    e: React.ChangeEvent<HTMLInputElement>
   ) => {
-    setFormData((prev) => ({
+    const { name, value } = e.target;
+    setFormData(prev => ({
       ...prev,
-      valores: {
-        ...prev.valores,
-        [categoria]: {
-          ...prev.valores[categoria],
-          [tipo]: parseFloat(valor) || 0,
-        },
-      },
+      place: { ...prev.place, [name]: value },
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleRoleCostChange = (role: Role, field: keyof DailyValuesPayload, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      role_costs: prev.role_costs.map(rc =>
+        rc.role === role ? { ...rc, [field]: Number(value) || 0 } : rc
+      ),
+    }));
+  };
+
+  const makeEventCreationPayload = (formData) => {
+    
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.name.trim()) { alert("Por favor informe o nome do evento."); return; }
-    
-    if (!formData.local.nome.trim()) { alert("Por favor informe o nome do local."); return; }
-    if (!formData.local.rua.trim()) { alert("Por favor informe a rua."); return; }
-    if (!formData.local.cidade.trim()) { alert("Por favor informe a cidade."); return; }
-    if (!formData.local.estado.trim()) { alert("Por favor informe o estado."); return; }
-    if (!formData.local.pais.trim()) { alert("Por favor informe o país."); return; }
+    if (!formData.name.trim()) return alert("Informe o nome do evento.");
+    if (!formData.description.trim()) return alert("Informe a descrição.");
+    if (!formData.place.name.trim()) return alert("Nome do local é obrigatório.");
 
-    if (!formData.description.trim()) { alert("Por favor informe a descrição do evento."); return; }
+    const startDate = new Date(formData.start_date);
+    const endDate = new Date(formData.end_date);
+    const limitDate = new Date(formData.confirmation_limit_date);
 
-    const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0);
-    
-    const inicio = new Date(formData.startDate);
-    const fim = new Date(formData.endDate);
-    const limite = new Date(formData.finalRequestDate);
+    if (isNaN(startDate.getTime())) return alert("Data de início inválida.");
+    if (isNaN(endDate.getTime())) return alert("Data de término inválida.");
+    if (isNaN(limitDate.getTime())) return alert("Data limite inválida.");
+    if (endDate < startDate) return alert("Data de término deve ser após o início.");
+    if (limitDate > startDate) return alert("Data limite deve ser antes do evento.");
 
-    if (isNaN(inicio.getTime())) { alert("Data de início inválida."); return; }
-    if (isNaN(fim.getTime())) { alert("Data de fim inválida."); return; }
-    if (isNaN(limite.getTime())) { alert("Data limite inválida."); return; }
-
-    if (fim < inicio) { alert("A data de fim não pode ser menor que a de início."); return; }
-    if (limite > inicio) { alert("A data limite de pedidos deve ser antes do evento começar."); return; }
-
-    for (const categoria in formData.valores) {
-      const catKey = categoria as keyof typeof formData.valores;
-      const valoresCat = formData.valores[catKey];
-      if (valoresCat.individual < 1 || valoresCat.duplo < 1 || valoresCat.convidado < 1) {
-        alert(`Os valores da categoria "${categoria}" não foram informados ou estão zerados.`);
-        return;
+    for (const cost of formData.role_costs) {
+      if (cost.individual <= 0 || cost.double <= 0 || cost.guest <= 0) {
+        return alert(`Valores incompletos para: ${RoleLabels[cost.role]}`);
       }
     }
 
-    console.log(isEditing ? "Atualizando evento:" : "Criando evento:", formData);
-    
-    alert("Salvo com sucesso!");
-    
-    if (isEditing) {
-        router.push(`/admin/eventos/${formData.id}`);
-    } else {
-        router.push("/admin/eventos");
+    try {
+      const event = await createEvent(formData);
+      alert("Evento salvo com sucesso!");
+      if (isEditing) {
+        // precisa atualizar isso
+        // router.push(`/admin/events/${(initialData)?.id}`);
+      } else {
+        router.push("/admin/events");
+      }
+    } catch (err) {
+      console.log(err);
     }
+
+    
   };
 
   return (
@@ -155,63 +134,66 @@ export default function EventForm({ initialData }: EventFormProps) {
           {isEditing ? "Editar Evento" : "Criar novo evento"}
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          {isEditing 
-            ? "Altere as informações abaixo e salve para atualizar o evento."
-            : "Preencha as informações do evento, dados do local e os valores das diárias."}
+          {isEditing
+            ? "Altere as informações e salve para atualizar."
+            : "Preencha os dados do evento e os custos por role."}
         </p>
       </CardHeader>
 
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-10">
-          
           <div className="space-y-6">
             <h2 className="text-lg font-semibold">Informações Gerais</h2>
             <Separator />
 
             <div className="space-y-2">
               <Label>Nome do Evento</Label>
-              <Input type="text" name="name" value={formData.name} onChange={handleBasicChange} />
+              <Input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleBasicChange}
+              />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="space-y-2">
+              <div>
                 <Label>Data de Início</Label>
-                <Input 
-                  type="date" 
-                  name="startDate" 
-                  value={formatDateForInput(formData.startDate)} 
-                  onChange={handleBasicChange} 
+                <Input
+                  type="date"
+                  name="start_date"
+                  value={formatDateForInput(formData.start_date)}
+                  onChange={handleBasicChange}
                 />
               </div>
 
-              <div className="space-y-2">
+              <div>
                 <Label>Data de Término</Label>
-                <Input 
-                  type="date" 
-                  name="endDate" 
-                  value={formatDateForInput(formData.endDate)} 
-                  onChange={handleBasicChange} 
+                <Input
+                  type="date"
+                  name="end_date"
+                  value={formatDateForInput(formData.end_date)}
+                  onChange={handleBasicChange}
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label>Data limite para confirmação</Label>
-                <Input 
-                  type="date" 
-                  name="finalRequestDate" 
-                  value={formatDateForInput(formData.finalRequestDate)} 
-                  onChange={handleBasicChange} 
+              <div>
+                <Label>Data Limite de Solicitações</Label>
+                <Input
+                  type="date"
+                  name="confirmation_limit_date"
+                  value={formatDateForInput(formData.confirmation_limit_date)}
+                  onChange={handleBasicChange}
                 />
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div>
               <Label>Descrição</Label>
-              <Textarea 
-                name="description" 
-                value={formData.description} 
-                onChange={handleBasicChange} 
-                placeholder="Informe uma descrição breve do evento" 
+              <Textarea
+                name="description"
+                value={formData.description}
+                onChange={handleBasicChange}
               />
             </div>
           </div>
@@ -220,95 +202,94 @@ export default function EventForm({ initialData }: EventFormProps) {
             <h2 className="text-lg font-semibold">Localização</h2>
             <Separator />
 
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label>Nome do Local (Hotel/Centro de Eventos)</Label>
-                <Input 
-                  type="text" 
-                  name="nome" 
-                  value={formData.local.nome as string} 
-                  onChange={handleLocalChange} 
-                  placeholder="Ex: Hotel Plaza São Rafael"
+            <div className="space-y-2">
+              <Label>Nome do Local</Label>
+              <Input
+                type="text"
+                name="name"
+                value={formData.place.name}
+                onChange={handlePlaceChange}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Rua</Label>
+              <Input
+                type="text"
+                name="street"
+                value={formData.place.street}
+                onChange={handlePlaceChange}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Complemento</Label>
+              <Input
+                type="text"
+                name="complement"
+                value={formData.place.complement ? formData.place.complement : ''}
+                onChange={handlePlaceChange}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <Label>Cidade</Label>
+                <Input
+                  type="text"
+                  name="city"
+                  value={formData.place.city}
+                  onChange={handlePlaceChange}
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="md:col-span-2 space-y-2">
-                  <Label>Rua/Logradouro</Label>
-                  <Input 
-                    type="text" 
-                    name="rua" 
-                    value={formData.local.rua as string} 
-                    onChange={handleLocalChange} 
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label>Complemento (Opcional)</Label>
-                  <Input 
-                    type="text" 
-                    name="complemento" 
-                    value={formData.local.complemento as string} 
-                    onChange={handleLocalChange} 
-                  />
-                </div>
+              <div>
+                <Label>Estado</Label>
+                <Input
+                  type="text"
+                  name="state"
+                  maxLength={2}
+                  value={formData.place.state}
+                  onChange={handlePlaceChange}
+                />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label>Cidade</Label>
-                  <Input 
-                    type="text" 
-                    name="cidade" 
-                    value={formData.local.cidade as string} 
-                    onChange={handleLocalChange} 
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Estado</Label>
-                  <Input 
-                    type="text" 
-                    name="estado" 
-                    value={formData.local.estado as string} 
-                    onChange={handleLocalChange} 
-                    maxLength={2}
-                    placeholder="UF"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>País</Label>
-                  <Input 
-                    type="text" 
-                    name="pais" 
-                    value={formData.local.pais as string} 
-                    onChange={handleLocalChange} 
-                    defaultValue="Brasil"
-                  />
-                </div>
+              <div>
+                <Label>País</Label>
+                <Input
+                  type="text"
+                  name="country"
+                  value={formData.place.country}
+                  onChange={handlePlaceChange}
+                />
               </div>
             </div>
           </div>
 
           <div className="space-y-6">
-            <h2 className="text-lg font-semibold">Valores e Cobertura por categoria</h2>
+            <h2 className="text-lg font-semibold">Valores por Cargo</h2>
             <Separator />
-            <EventValuesForm valores={formData.valores} onChange={handleValuesChange} />
+
+            <EventValuesForm
+              costs={formData.role_costs}
+              onChange={handleRoleCostChange}
+            />
           </div>
 
-          <div className="flex justify-end pt-4 gap-4">
-            <Button variant="outline" type="button" asChild>
-              <Link href={isEditing ? `/admin/eventos/${formData.id}` : "/admin/eventos"}>
+          <div className="flex justify-end gap-4 pt-4">
+            <Button variant="outline" asChild>
+
+              {
+              // tem que atualizar aqui
+              /* <Link href={isEditing ? `/admin/events/${(initialData)?.id}` : "/admin/events"}>
                 Cancelar
-              </Link>
+              </Link> */}
             </Button>
 
-            <Button type="submit" className="px-8 py-3">
+            <Button type="submit">
               {isEditing ? "Salvar Alterações" : "Salvar Evento"}
             </Button>
           </div>
-
         </form>
       </CardContent>
     </Card>

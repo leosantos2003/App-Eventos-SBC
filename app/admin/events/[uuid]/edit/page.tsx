@@ -4,6 +4,7 @@ import { ChevronLeft } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import EventForm from "@/components/EventForm";
+import { AuthLayout } from "@/components/auth/auth-layout";
 
 const MOCK_DB = [
   {
@@ -39,30 +40,32 @@ async function getEventById(id: string) {
 
 interface EditEventPageProps {
   params: {
-    id: string;
+    uuid: string;
   };
 }
 
 export default async function EditEventPage({ params }: EditEventPageProps) {
-  const event = await getEventById(params.id);
+  const event = await getEventById(params.uuid);
 
   if (!event) {
     notFound();
   }
 
   return (
-    <div className="max-w-5xl mx-auto py-10 px-4">
-      <div className="mb-6">
-        <Button variant="ghost" asChild className="pl-0 hover:pl-2 transition-all text-muted-foreground">
-          <Link href={`/admin/eventos/${params.id}`}>
-            <ChevronLeft className="mr-2 h-4 w-4" />
-            Voltar para Detalhes
-          </Link>
-        </Button>
-      </div>
+    <AuthLayout>
+      <div className="max-w-5xl mx-auto py-10 px-4">
+        <div className="mb-6">
+          <Button variant="ghost" asChild className="pl-0 hover:pl-2 transition-all text-muted-foreground">
+            <Link href={`/admin/events/${params.id}`}>
+              <ChevronLeft className="mr-2 h-4 w-4" />
+              Voltar para Detalhes
+            </Link>
+          </Button>
+        </div>
 
-      <EventForm initialData={event} />
-      
-    </div>
+        <EventForm initialData={event} />
+        
+      </div>
+    </AuthLayout>
   );
 }

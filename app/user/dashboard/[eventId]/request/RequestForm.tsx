@@ -87,9 +87,9 @@ export default function RequestForm({
     const formData = new FormData(e.currentTarget);
 
   const rawBirth = formData.get("birth-date");
-    const rawCpf = formData.get("cpf");
-    const rawRole = formData.get("role");
-    const rawEmail = formData.get("email");
+  const rawCpf = formData.get("cpf");
+  const rawRole = formData.get("role");
+  const rawEmail = formData.get("email");
   const rawCheckin = formData.get("checkin-date");
   const rawCheckout = formData.get("checkout-date");
   const rawPhone = formData.get("phone");
@@ -97,10 +97,10 @@ export default function RequestForm({
   const rawObservations = formData.get("observations");
 
   const name = nameState.trim();
-    const birthDate = typeof rawBirth === "string" ? rawBirth : "";
-    const cpf = typeof rawCpf === "string" ? rawCpf.trim() : "";
-    const roleValue = typeof rawRole === "string" ? rawRole : "";
-    const email = typeof rawEmail === "string" ? rawEmail.trim() : "";
+  const birthDate = typeof rawBirth === "string" ? rawBirth : "";
+  const cpf = typeof rawCpf === "string" ? rawCpf.trim() : "";
+  const roleValue = typeof rawRole === "string" ? rawRole : "";
+  const email = typeof rawEmail === "string" ? rawEmail.trim() : "";
   const checkin = typeof rawCheckin === "string" ? rawCheckin : "";
   const checkout = typeof rawCheckout === "string" ? rawCheckout : "";
   const phone = typeof rawPhone === "string" ? rawPhone.trim() : "";

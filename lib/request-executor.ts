@@ -1,10 +1,14 @@
 export async function executeRequest<T>(path: string, init?: RequestInit): Promise<T> {
-  // const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${path}`, {
-    const res = await fetch(path, {
-    // credentials: "include",
-    headers: { "Content-Type": "application/json", ...(init?.headers || {}) },
+  const token = localStorage.getItem("access");
+  const res = await fetch(path, {
+    headers: {
+      "Content-Type": "application/json",
+      ...(init?.headers || {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
     ...init,
   });
+
   if (!res.ok) {
     const text = await res.text().catch(() => "");
     throw new Error(text || `HTTP ${res.status}`);

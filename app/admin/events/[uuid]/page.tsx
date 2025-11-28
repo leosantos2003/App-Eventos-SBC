@@ -1,6 +1,7 @@
-import Link from "next/link";
-import { notFound } from "next/navigation";
+'use client'
 
+import Link from "next/link";
+import { notFound, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,7 +12,6 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-
 import {
   CalendarIcon,
   MapPinIcon,
@@ -20,95 +20,54 @@ import {
   ClipboardList,
   FileBarChart,
   ChevronLeft,
-  Clock,
   DollarSign,
   CalendarClock,
   AlertCircle,
-  CheckCircle2
 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Event } from "@/types/index";
+import { getEventByUUID } from "@/lib/api/events";
+import { getEventStatus } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
+import { createEmptyRoleCost, createEmptyPlace } from "@/lib/utils";
+import { Role, RoleLabels } from "@/constants/roles";
 
-import { NewEvent } from "@/types/";
-
-const MOCK_EVENTO: NewEvent = {
-  id: 1,
-  name: "Congresso Brasileiro de Software 2025",
-  startDate: new Date("2025-10-20T00:00:00"), 
-  endDate: new Date("2025-10-24T00:00:00"),   
-  local: {
-    id: 1,
-    nome: "Centro de Convenções PUCRS",
-    rua: "Av. Ipiranga, 6681",
-    cidade: "Porto Alegre",
-    estado: "RS",
-    pais: "Brasil",
-    complemento: "Prédio 40"
-  },
-  description: `O CBSoft é um dos principais eventos da Sociedade Brasileira de Computação.
-  
-  O evento contará com trilhas de Engenharia de Software, Sistemas de Informação e diversas palestras internacionais.
-  
-  Contamos com a presença de todos os associados.`,
-  finalRequestDate: new Date("2025-10-10T00:00:00"),
-  
-  valores: {
-    diretoria: { individual: 150, duplo: 250, convidado: 100, diariasCobertas: 4 },
-    conselho: { individual: 100, duplo: 200, convidado: 80, diariasCobertas: 3 },
-    comissaoEdu: { individual: 0, duplo: 0, convidado: 0, diariasCobertas: 0 },
-    secretarioRegional: { individual: 0, duplo: 0, convidado: 0, diariasCobertas: 0 },
-    cooComissaoEsp: { individual: 0, duplo: 0, convidado: 0, diariasCobertas: 0 },
-    outros: { individual: 500, duplo: 800, convidado: 400, diariasCobertas: 0 },
-  }
+const defaultEvent: Event = {
+  uuid: '',
+  name: '',
+  start_date: '',
+  end_date: '',
+  confirmation_limit_date: '',
+  description: '',
+  place: createEmptyPlace(),
+  role_costs: [
+    createEmptyRoleCost(Role.DIRECTORY_MEMBER),
+    createEmptyRoleCost(Role.COUNCIL_MEMBER),
+    createEmptyRoleCost(Role.EDUCATION_COMMISSION),
+    createEmptyRoleCost(Role.REGIONAL_SECRETARY),
+    createEmptyRoleCost(Role.SPECIAL_COMMISSION_COORDINATOR),
+    createEmptyRoleCost(Role.OTHERS),
+  ],
+  created_at: '',
+  created_by: '',
 };
 
-async function getEventByIdMock(id: string) {
-  await new Promise((resolve) => setTimeout(resolve, 100));
-  return { ...MOCK_EVENTO, id: Number(id) };
-}
+export default function EventDetailsPage() {
+    const uuid = useParams().uuid as string;
+    const [event, setEvent] = useState<Event>(defaultEvent);
+  
+    useEffect(() => {
+      getEventByUUID(uuid).then(event => {
+        if (event) {
+          setEvent(event);
+          console.log(event.role_costs[1].individual)
+        } else {
+          notFound();
+        }
+      });
+    }, [uuid]);
 
-function getEventStatus(start: Date, end: Date) {
-  const now = new Date();
-  now.setHours(0, 0, 0, 0);
-  const startZero = new Date(start); startZero.setHours(0,0,0,0);
-  const endZero = new Date(end); endZero.setHours(0,0,0,0);
-
-  if (now > endZero) {
-    return { label: "Encerrado", color: "bg-gray-100 text-gray-600", icon: CheckCircle2 };
-  }
-  if (now >= startZero && now <= endZero) {
-    return { label: "Em Andamento", color: "bg-green-100 text-green-700", icon: Clock };
-  }
-  return { label: "Em Breve", color: "bg-blue-100 text-blue-700", icon: CalendarClock };
-}
-
-const formatCategoria = (key: string) => {
-  const map: Record<string, string> = {
-    diretoria: "Diretoria",
-    conselho: "Conselho",
-    comissaoEdu: "Comissão de Educação",
-    secretarioRegional: "Secretário Regional",
-    cooComissaoEsp: "Coord. Comissão Especial",
-    outros: "Outros",
-  };
-  return map[key] || key;
-};
-
-const formatDate = (date: Date) => {
-    return date.toLocaleDateString('pt-BR');
-};
-
-interface EventDetailsPageProps {
-  params: {
-    id: string;
-  };
-}
-
-export default async function EventDetailsPage({ params }: EventDetailsPageProps) {
-  const event = await getEventByIdMock(params.id);
-  if (!event) {
-    notFound();
-  }
-
-  const status = getEventStatus(event.startDate, event.endDate);
+  const status = getEventStatus(event.start_date, event.end_date);
   const StatusIcon = status.icon;
 
   return (
@@ -136,12 +95,12 @@ export default async function EventDetailsPage({ params }: EventDetailsPageProps
           <div className="flex flex-col sm:flex-row sm:items-center gap-4 text-muted-foreground text-sm">
             <div className="flex items-center gap-1.5">
               <CalendarIcon className="h-4 w-4" />
-              <span>{formatDate(event.startDate)} até {formatDate(event.endDate)}</span>
+              <span>{formatDate(event.start_date)} até {formatDate(event.end_date)}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <MapPinIcon className="h-4 w-4" />
               <span>
-                {event.local.nome} • {event.local.cidade}/{event.local.estado}
+                {event.place.name} • {event.place.city}/{event.place.state}
               </span>
             </div>
           </div>
@@ -165,9 +124,9 @@ export default async function EventDetailsPage({ params }: EventDetailsPageProps
                         <h4 className="font-semibold text-gray-900 flex items-center gap-2 mb-2">
                             <MapPinIcon className="h-4 w-4" /> Localização 
                         </h4>
-                        <p>{event.local.nome}</p>
-                        <p>{event.local.rua}{event.local.complemento ? `, ${event.local.complemento}` : ''}</p>
-                        <p>{event.local.cidade} - {event.local.estado}, {event.local.pais}</p>
+                        <p>{event.place.name}</p>
+                        <p>{event.place.street}{event.place.complement ? `, ${event.place.complement}` : ''}</p>
+                        <p>{event.place.city}/{event.place.state}, {event.place.country}</p>
                     </div>
                 </CardContent>
             </Card>
@@ -193,14 +152,14 @@ export default async function EventDetailsPage({ params }: EventDetailsPageProps
                                 </tr>
                             </thead>
                             <tbody className="divide-y">
-                                {Object.entries(event.valores).map(([key, val]) => (
-                                    <tr key={key} className="hover:bg-gray-50/50">
-                                        <td className="px-4 py-3 font-medium text-gray-700">{formatCategoria(key)}</td>
-                                        <td className="px-4 py-3">R$ {val.individual.toFixed(2)}</td>
-                                        <td className="px-4 py-3">R$ {val.duplo.toFixed(2)}</td>
-                                        <td className="px-4 py-3">R$ {val.convidado.toFixed(2)}</td>
+                                {event.role_costs.map((cost) => (
+                                    <tr key={cost.role} className="hover:bg-gray-50/50">
+                                        <td className="px-4 py-3 font-medium text-gray-700">{RoleLabels[cost.role]}</td>
+                                        <td className="px-4 py-3">R$ {cost.individual}</td>
+                                        <td className="px-4 py-3">R$ {cost.double}</td>
+                                        <td className="px-4 py-3">R$ {cost.guest}</td>
                                         <td className="px-4 py-3 font-bold text-green-700 bg-green-50/30 text-center">
-                                            {val.diariasCobertas}
+                                            {cost.days_covered}
                                         </td>
                                     </tr>
                                 ))}
@@ -223,18 +182,18 @@ export default async function EventDetailsPage({ params }: EventDetailsPageProps
             <CardContent className="grid gap-4 text-sm">
                 <div className="flex justify-between items-center border-b pb-2 border-blue-100">
                     <span className="text-muted-foreground">Início</span>
-                    <span className="font-medium">{formatDate(event.startDate)}</span>
+                    <span className="font-medium">{formatDate(event.start_date)}</span>
                 </div>
                 <div className="flex justify-between items-center border-b pb-2 border-blue-100">
                     <span className="text-muted-foreground">Término</span>
-                    <span className="font-medium">{formatDate(event.endDate)}</span>
+                    <span className="font-medium">{formatDate(event.end_date)}</span>
                 </div>
                 <div className="flex justify-between items-center pt-1">
                     <span className="text-muted-foreground flex items-center gap-1">
                         <AlertCircle className="h-3 w-3 text-orange-500" />
                         Limite Pedidos
                     </span>
-                    <span className="font-bold text-orange-700">{formatDate(event.finalRequestDate)}</span>
+                    <span className="font-bold text-orange-700">{formatDate(event.confirmation_limit_date)}</span>
                 </div>
             </CardContent>
           </Card>
@@ -247,21 +206,21 @@ export default async function EventDetailsPage({ params }: EventDetailsPageProps
             <CardContent className="flex flex-col gap-3">
               
               <Button asChild variant="outline" className="justify-start h-12 w-full hover:bg-blue-50 hover:text-blue-700 border-gray-200">
-                <Link href={`/admin/eventos/${event.id}/editar`}>
+                <Link href={`/admin/events/${event.uuid}/edit`}>
                   <Edit className="mr-3 h-4 w-4 text-blue-600" />
                   Editar Evento
                 </Link>
               </Button>
 
               <Button asChild variant="outline" className="justify-start h-12 w-full hover:bg-purple-50 hover:text-purple-700 border-gray-200">
-                <Link href={`/admin/eventos/${event.id}/participantes`}>
+                <Link href={`/admin/events/${event.uuid}/participants`}>
                   <Users className="mr-3 h-4 w-4 text-purple-600" />
                   Participantes
                 </Link>
               </Button>
 
               <Button asChild variant="outline" className="justify-start h-12 w-full hover:bg-orange-50 hover:text-orange-700 border-gray-200 group">
-                <Link href={`/admin/eventos/${event.id}/solicitacoes`} className="flex justify-between w-full items-center">
+                <Link href={`/admin/events/${event.uuid}/requests`} className="flex justify-between w-full items-center">
                   <div className="flex items-center">
                     <ClipboardList className="mr-3 h-4 w-4 text-orange-600" />
                     Solicitações
@@ -275,7 +234,6 @@ export default async function EventDetailsPage({ params }: EventDetailsPageProps
                   <FileBarChart className="mr-3 h-4 w-4" />
                   Relatório Final
               </Button>
-
             </CardContent>
           </Card>
         </div>

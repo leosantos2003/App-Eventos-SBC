@@ -11,17 +11,19 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ChevronLeftIcon } from "lucide-react";
-import { loginUser } from '../api/auth'
-import { FormEvent, ChangeEvent } from "react";
+import { loginUser } from '../../lib/api/auth'
+import { FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "../../contexts/auth-provider";
 
-export default function GuestLoginPage() {
+export default function LoginPage() {
   const router = useRouter();
+  const { refreshUser } = useAuth();
 
   async function onLogin(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault(); // impede reload
-    const formData = new FormData(e.currentTarget);
+    e.preventDefault();
 
+    const formData = new FormData(e.currentTarget);
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
 
@@ -34,9 +36,11 @@ export default function GuestLoginPage() {
       if (response.access && response.refresh) {
         localStorage.setItem("access", response.access);
         localStorage.setItem("refresh", response.refresh);
-        router.push("/dashboard");
+        await refreshUser();
+        router.push("/redirect");
       }
-    } catch (error: any) {
+    } catch (err) {
+      console.log(err)
       alert("Falha na autenticação");
     }
   }
@@ -60,11 +64,7 @@ export default function GuestLoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={onLogin}
-              // action="/dashboard" // Redireciona para o dashboard após o "login"
-              className="space-y-6"
-            >
-              {/* Campos de Input agrupados */}
+            <form onSubmit={onLogin} className="space-y-6" >
               <div className="space-y-4">
                 <div className="grid w-full items-center gap-2">
                   <Label htmlFor="email">E-mail</Label>
