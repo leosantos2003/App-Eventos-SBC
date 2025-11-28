@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
@@ -16,15 +16,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ChevronLeftIcon } from "lucide-react";
-
-type EventInfo = {
-  id: number;
-  name: string;
-};
+import { Event } from "@/types/index";
+import { getEventByUUID } from "@/lib/api/events";
+import { useAuth } from "@/contexts/auth-provider";
 
 type NewRequestData = {
-  eventId: number;
-  userId: number;
+  eventUuid: string;
+  userUuid: string;
   name: string;
   birthDate: string;
   checkinDate: string;
@@ -37,17 +35,13 @@ type NewRequestData = {
   observations?: string;
 };
 
-// Travel request type removed because travel submission is simulated in this form
-
-export default function RequestForm({
-  event,
-  eventId,
-}: {
-  event: EventInfo;
-  eventId: number;
-}) {
+export default function RequestForm({ eventUuid }: { eventUuid: string }) {
   const router = useRouter();
-  const userId = 1; // Simula o ID do usuário logado
+  const { user } = useAuth();
+  
+  const [event, setEvent] = useState<Event | null>(null);
+  const [loading, setLoading] = useState(true);
+
   const [nameState, setNameState] = useState("");
   const [role, setRole] = useState("");
   const [showTravelForm, setShowTravelForm] = useState(false);
@@ -58,6 +52,27 @@ export default function RequestForm({
   const [departOriginState, setDepartOriginState] = useState("");
   const [departDestinationState, setDepartDestinationState] = useState("");
   const [returnEdited, setReturnEdited] = useState(false);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const data = await getEventByUUID(eventUuid);
+        setEvent(data);
+      } catch (err) {
+        console.error("Erro ao buscar evento:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, [eventUuid]);
+
+  // Pra preencher o nome automaticamente se o usuário estiver logado, mas dá pra tirar se quiser
+  useEffect(() => {
+    if (user?.name && !nameState) {
+      setNameState(user.name);
+    }
+  }, [user]);
 
   const autoFillReturnIfAppropriate = (
     departOrigin: string,
@@ -72,8 +87,8 @@ export default function RequestForm({
     ) as HTMLInputElement | null;
     if (!returnOriginInput || !returnDestinationInput) return;
 
-  const currentlyAutoOrigin = returnOriginInput.value === departDestination;
-  const currentlyAutoDestination = returnDestinationInput.value === departOrigin;
+    const currentlyAutoOrigin = returnOriginInput.value === departDestination;
+    const currentlyAutoDestination = returnDestinationInput.value === departOrigin;
     const empty = !returnOriginInput.value && !returnDestinationInput.value;
 
     if (empty || (currentlyAutoOrigin && currentlyAutoDestination)) {
@@ -84,65 +99,61 @@ export default function RequestForm({
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    // Se o evento ainda não carregou, não deixa enviar
+    if (!event) return;
+
     const formData = new FormData(e.currentTarget);
 
-  const rawBirth = formData.get("birth-date");
-  const rawCpf = formData.get("cpf");
-  const rawRole = formData.get("role");
-  const rawEmail = formData.get("email");
-  const rawCheckin = formData.get("checkin-date");
-  const rawCheckout = formData.get("checkout-date");
-  const rawPhone = formData.get("phone");
-  const rawNumberOfPeople = formData.get("number-of-people");
-  const rawObservations = formData.get("observations");
+    const rawBirth = formData.get("birth-date");
+    const rawCpf = formData.get("cpf");
+    const rawRole = formData.get("role");
+    const rawEmail = formData.get("email");
+    const rawCheckin = formData.get("checkin-date");
+    const rawCheckout = formData.get("checkout-date");
+    const rawPhone = formData.get("phone");
+    const rawNumberOfPeople = formData.get("number-of-people");
+    const rawObservations = formData.get("observations");
 
-  const name = nameState.trim();
-  const birthDate = typeof rawBirth === "string" ? rawBirth : "";
-  const cpf = typeof rawCpf === "string" ? rawCpf.trim() : "";
-  const roleValue = typeof rawRole === "string" ? rawRole : "";
-  const email = typeof rawEmail === "string" ? rawEmail.trim() : "";
-  const checkin = typeof rawCheckin === "string" ? rawCheckin : "";
-  const checkout = typeof rawCheckout === "string" ? rawCheckout : "";
-  const phone = typeof rawPhone === "string" ? rawPhone.trim() : "";
-  const numberOfPeople = typeof rawNumberOfPeople === "string" ? parseInt(rawNumberOfPeople, 10) : NaN;
-  const observations = typeof rawObservations === "string" ? rawObservations.trim() : "";
+    const name = nameState.trim();
+    const birthDate = typeof rawBirth === "string" ? rawBirth : "";
+    const cpf = typeof rawCpf === "string" ? rawCpf.trim() : "";
+    const roleValue = typeof rawRole === "string" ? rawRole : "";
+    const email = typeof rawEmail === "string" ? rawEmail.trim() : "";
+    const checkin = typeof rawCheckin === "string" ? rawCheckin : "";
+    const checkout = typeof rawCheckout === "string" ? rawCheckout : "";
+    const phone = typeof rawPhone === "string" ? rawPhone.trim() : "";
+    const numberOfPeople = typeof rawNumberOfPeople === "string" ? parseInt(rawNumberOfPeople, 10) : NaN;
+    const observations = typeof rawObservations === "string" ? rawObservations.trim() : "";
 
-    // Validações
     if (!name) {
       alert("Por favor informe o nome.");
       return;
     }
-
     if (!birthDate) {
       alert("Por favor informe a data de nascimento.");
       return;
     }
-
     if (!cpf) {
       alert("Por favor informe o CPF.");
       return;
     }
-
     if (!roleValue) {
       alert("Por favor selecione a função.");
       return;
     }
-
     if (!email) {
       alert("Por favor informe o e-mail.");
       return;
     }
-
     if (!checkin) {
       alert("Por favor informe a data de check-in.");
       return;
     }
-
     if (!checkout) {
       alert("Por favor informe a data de check-out.");
       return;
     }
-
     if (isNaN(numberOfPeople) || numberOfPeople < 1) {
       alert("Por favor informe o número de pessoas (mínimo 1).");
       return;
@@ -151,7 +162,7 @@ export default function RequestForm({
     const validateCPF = (raw: string) => {
       const s = raw.replace(/\D/g, "");
       if (s.length !== 11) return false;
-      if (/^(\d)\1{10}$/.test(s)) return false; // todos os dígitos iguais
+      if (/^(\d)\1{10}$/.test(s)) return false; 
       const calc = (t: number) => {
         let sum = 0;
         for (let i = 0; i < t - 1; i++) sum += parseInt(s.charAt(i)) * (t - i);
@@ -174,15 +185,18 @@ export default function RequestForm({
 
     const phoneDigits = phone.replace(/\D/g, "");
     if (phoneDigits.length < 8 || phoneDigits.length > 15) {
-      alert("Telefone inválido. Informe um número com DDD e número (apenas dígitos)." );
+      alert("Telefone inválido. Informe um número com DDD e número (apenas dígitos).");
       return;
     }
 
-    // Validações de datas: checkin não pode ser antes de hoje; checkout não pode ser antes do checkin
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const checkinDateObj = new Date(checkin + "T00:00:00");
     const checkoutDateObj = new Date(checkout + "T00:00:00");
+    
+    const eventStart = new Date(event.start_date);
+    const eventEnd = new Date(event.end_date);
+
     if (isNaN(checkinDateObj.getTime())) {
       alert("Data de check-in inválida.");
       return;
@@ -191,20 +205,23 @@ export default function RequestForm({
       alert("Data de check-out inválida.");
       return;
     }
-
     if (checkinDateObj < today) {
       alert("A data de check-in não pode ser anterior à data atual.");
       return;
     }
-
     if (checkoutDateObj < checkinDateObj) {
       alert("A data de check-out não pode ser anterior à data de check-in.");
       return;
     }
+    // validar se está dentro do período do evento
+    if (checkinDateObj < eventStart) {
+        alert("O check-in não pode ser antes do início do evento.");
+        return;
+    }
 
     const newRequestData: NewRequestData = {
-      eventId,
-      userId,
+      eventUuid,
+      userUuid: user?.uuid || "",
       name,
       birthDate,
       checkinDate: checkin,
@@ -217,7 +234,6 @@ export default function RequestForm({
       observations,
     };
 
-    // Guardamos os dados básicos
     setSubmittedData(newRequestData);
 
     if (showTravelForm) {
@@ -229,7 +245,7 @@ export default function RequestForm({
       const rawReturn = formData.get("return-date");
       const rawReturnOrigin = formData.get("return-origin");
       const rawReturnDestination = formData.get("return-destination");
-  const rawReturnShift = formData.get("return-shift");
+      const rawReturnShift = formData.get("return-shift");
 
       const travelName = typeof rawTravelName === "string" ? rawTravelName.trim() : "";
       const departDate = typeof rawDepart === "string" ? rawDepart : "";
@@ -240,47 +256,62 @@ export default function RequestForm({
       const returnOrigin = typeof rawReturnOrigin === "string" ? rawReturnOrigin.trim() : "";
       const returnDestination = typeof rawReturnDestination === "string" ? rawReturnDestination.trim() : "";
       const returnShiftValue = typeof rawReturnShift === "string" ? rawReturnShift : "";
-  // travel observations are read but not sent in this simulation
 
       if (!travelName) {
         alert("Por favor informe o nome para a passagem.");
         return;
       }
-
       if (!departDate) {
         alert("Por favor informe a data de ida.");
         return;
       }
-
       if (!departOrigin || !departDestination) {
         alert("Por favor informe origem e destino da viagem de ida.");
         return;
       }
-
       if (!departShiftValue) {
         alert("Por favor selecione o turno da viagem de ida.");
         return;
       }
-
       if (returnDate && (!returnOrigin || !returnDestination || !returnShiftValue)) {
         alert("Se informar data de volta, preencha origem/destino/turno da volta.");
         return;
       }
 
       alert("Solicitação enviada com passagem (simulada). Redirecionando para pagamento...");
-      router.push(`/payment`);
+      router.push(`/user/payment`);
       return;
     }
 
-    router.push(`/payment`);
+    // Aqui tem que fazer o POST real para a API
+    console.log("Dados para envio:", newRequestData);
+    
+    router.push(`/user/payment`);
   };
 
-  
+  if (loading) {
+    return (
+      <div className="grow flex flex-col items-center justify-center p-8">
+        <p>Carregando formulário...</p>
+      </div>
+    );
+  }
+
+  if (!event) {
+    return (
+      <div className="grow flex flex-col items-center justify-center p-8">
+        <p>Evento não encontrado.</p>
+        <Link href="/user/dashboard">
+            <Button variant="link">Voltar</Button>
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div>
       <div className="mb-4">
-        <Link href="/dashboard">
+        <Link href={`/user/dashboard/${eventUuid}`}>
           <Button variant="outline" size="icon">
             <ChevronLeftIcon />
           </Button>
@@ -311,19 +342,19 @@ export default function RequestForm({
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="grid w-full items-center gap-2">
-                  <Label htmlFor="birth-date">Data de nascimento</Label>
-                  <Input type="date" id="birth-date" name="birth-date" required />
+                    <Label htmlFor="birth-date">Data de nascimento</Label>
+                    <Input type="date" id="birth-date" name="birth-date" required />
                   </div>
 
                   <div className="grid w-full items-center gap-2">
-                  <Label htmlFor="cpf">CPF</Label>
-                  <Input
-                    type="text"
-                    id="cpf"
-                    name="cpf"
-                    placeholder="000.000.000-00"
-                    required
-                  />
+                    <Label htmlFor="cpf">CPF</Label>
+                    <Input
+                      type="text"
+                      id="cpf"
+                      name="cpf"
+                      placeholder="000.000.000-00"
+                      required
+                    />
                   </div>
                 </div>
 
@@ -383,31 +414,41 @@ export default function RequestForm({
                   </div>
                 </div>
 
-
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="grid w-full items-center gap-2">
                     <Label htmlFor="checkin-date">Data de check-in</Label>
-                    <Input type="date" id="checkin-date" name="checkin-date" required />
+                    <Input 
+                      type="date" 
+                      id="checkin-date" 
+                      name="checkin-date" 
+                      required
+                      min={event.start_date.split('T')[0]}
+                    />
                   </div>
 
                   <div className="grid w-full items-center gap-2">
                     <Label htmlFor="checkin-time-pref">Turno de Preferência</Label>
-                    <Input type="date" id="checkin-time-pref" name="checkin-time-pref" required />
+                    <Input type="date" id="checkin-time-pref" name="checkin-time-pref" required /> 
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="grid w-full items-center gap-2">
-                    <Label htmlFor="checkin-out">Data de check-out</Label>
-                    <Input type="date" id="checkout-date" name="checkout-date" required />
+                    <Label htmlFor="checkout-date">Data de check-out</Label>
+                    <Input 
+                      type="date" 
+                      id="checkout-date" 
+                      name="checkout-date" 
+                      required 
+                      max={event.end_date.split('T')[0]}
+                    />
                   </div>
 
                   <div className="grid w-full items-center gap-2">
                     <Label htmlFor="checkout-time-pref">Turno de Preferência</Label>
-                    <Input type="date" id="checkout-time-pref" name="checkout-time-pref" required />
+                    <Input type="time" id="checkout-time-pref" name="checkout-time-pref" required />
                   </div>
                 </div>
-
 
                 <div className="grid w-full items-center gap-2">
                   <Label htmlFor="observations">Observações extras</Label>
@@ -417,24 +458,25 @@ export default function RequestForm({
                 <div className="mt-4 p-4 border rounded">
                   <p className="mb-3">Deseja também fazer a solicitação de viagem?</p>
                   <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    onClick={() => setShowTravelForm(true)}
-                  >
-                    Sim
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => setShowTravelForm(false)}
-                  >
-                    Não
-                  </Button>
+                    <Button
+                      type="button"
+                      onClick={() => setShowTravelForm(true)}
+                      variant={showTravelForm ? "default" : "outline"}
+                    >
+                      Sim
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={!showTravelForm ? "default" : "outline"}
+                      onClick={() => setShowTravelForm(false)}
+                    >
+                      Não
+                    </Button>
                   </div>
                 </div>
 
                 {showTravelForm && (
-                  <div className="mt-4 p-4 border rounded">
+                  <div className="mt-4 p-4 border rounded animate-in fade-in zoom-in-95 duration-200">
                     <p className="mb-3 font-medium">Formulário de solicitação de viagem</p>
 
                     <div className="space-y-4">
@@ -447,6 +489,7 @@ export default function RequestForm({
                           value={nameState}
                           readOnly
                           required
+                          className="bg-muted"
                         />
                       </div>
 
