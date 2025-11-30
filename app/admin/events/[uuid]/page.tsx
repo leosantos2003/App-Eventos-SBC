@@ -38,11 +38,10 @@ export default function EventDetailsPage() {
 
   useEffect(() => {
     getEventByUUID(uuid).then(event => {
-      if (event) {
-        setEvent(event);
-      } else {
-        notFound();
-      }
+      setEvent(event);
+    }).catch((err) => {
+      console.log(err);
+      notFound();
     });
   }, [uuid]);
 
