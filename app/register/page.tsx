@@ -1,11 +1,12 @@
 "use client";
+
 import { useState, FormEvent, ChangeEvent } from "react";
 import { cpf } from "cpf-cnpj-validator";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { executeRequest } from "../api/requestExecutor";
-import { Routes } from "../api/routes";
+import { executeRequest } from "../../lib/request-executor";
+import { Routes } from "../../config/routes";
 import { User } from "../../types/index";
 import { useRouter } from "next/navigation";
 import countries from "i18n-iso-countries";
@@ -51,34 +52,27 @@ export default function RegisterPage() {
     const email = formData.get("email") as string;
     const birthDate = formData.get("birthDate") as string;
     const password = formData.get("password") as string;
-
-    let payload: any = {
-      name,
-      email,
-      birth_date: birthDate,
-      password,
-    };
-
-    if (usePassport) {
-      const passportNumber = formData.get("passport") as string;
-      const passportCountry = formData.get("passportCountry") as string;
-
-      payload.passport_number = passportNumber;
-      payload.passport_country = passportCountry;
-      payload.cpf = null;
-    } else {
-      if (!cpf.isValid(cpfValue)) {
-        setCpfError("CPF inválido");
-        return;
-      }
-
-      payload.cpf = cpf.strip(cpfValue);
-      payload.passport_number = null;
-      payload.passport_country = null;
+    const passportNumber = formData.get("passport") as string;
+    const passportCountry = formData.get("passportCountry") as string;
+    
+    if (!usePassport && !cpf.isValid(cpfValue)) {
+      setCpfError("CPF inválido");
+      return;
     }
 
+    const payload = {
+      name,
+      email,
+      cpf: cpf.strip(cpfValue) ? cpf.strip(cpfValue) : null,
+      passport_number: passportNumber ? passportNumber : null,
+      passport_country: passportNumber ? passportCountry : null,
+      birth_date: birthDate,
+      password
+    };
+
     try {
-      console.log(payload);
+      // localStorage.removeItem("access");
+      // localStorage.removeItem("refresh");
       await executeRequest<User>(Routes.users, {
         method: "POST",
         body: JSON.stringify(payload),

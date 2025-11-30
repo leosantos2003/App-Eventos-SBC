@@ -1,49 +1,42 @@
+"use client";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import "@/app/dashboard/CardsEventos.css";
+import "@/app/user/dashboard/CardsEventos.css";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { events, users, userEvents } from "@/lib/data";
-import {
-  Calendar,
-  CalendarIcon,
-  ChevronLeftIcon,
-  MapPin,
-  MapPinIcon,
-} from "lucide-react";
-import { ModeToggle } from "@/components/mode-toggle";
-import { Header } from "@/components/ui/header";
-
-// Função para buscar todos os eventos de um usuário
-const getUserEventsData = (userCpf: number) => {
-  const user = users.find((u) => u.cpf === userCpf);
-  const userEventLinks = userEvents.filter((ue) => ue.userId === userCpf);
-  const userEventsDetails = userEventLinks
-    .map((link) => {
-      return events.find((event) => event.id === link.eventId);
-    })
-    .filter((event) => event !== undefined);
-
-  return { user, userEvents: userEventsDetails as typeof events };
-};
+import { CalendarIcon, ChevronLeftIcon, MapPinIcon } from "lucide-react";
+import { useAuth } from "@/contexts/auth-provider";
+import { Event } from "@/types/index";
+import { getAllEvents } from "@/lib/api/events";
+import { formatDatePtBr } from "@/lib/utils";
 
 export default function UserDashboard() {
-  const userId = 1; // Simula o ID do usuário logado
-  const { user, userEvents } = getUserEventsData(userId);
+  const { user, loading: authLoading } = useAuth();
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  if (!user) {
-    return (
-      <main className="p-8">
-        <h1 className="text-2xl font-bold">Usuário não encontrado.</h1>
-      </main>
-    );
-  }
+  useEffect(() => {
+    async function fetchEvents() {
+      try {
+        const data = await getAllEvents();
+        setEvents(data);
+      } catch (error) {
+        console.error("Erro ao buscar eventos:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchEvents();
+  }, []);
+
+  if (authLoading || loading) return <p className="p-8">Carregando...</p>;
+  if (!user) return <p className="p-8">Não autenticado</p>;
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -65,21 +58,21 @@ export default function UserDashboard() {
         </p>
       </div>
 
-      {userEvents.length > 0 ? (
+      {events.length > 0 ? (
         <div className="cardsContainer">
-          {userEvents.map((event) => (
-            <div className="card" key={event.id}>
+          {events.map((event) => (
+            <div className="card" key={event.uuid}>
               <Card>
                 <CardHeader>
                   <CardTitle>{event.name}</CardTitle>
                   <div className="flex items-center gap-4 text-sm text-muted-foreground pt-2">
                     <div className="flex items-center gap-1.5">
                       <CalendarIcon className="h-4 w-4" />
-                      <span>{event.date}</span>
+                      <span>{formatDatePtBr(event.start_date)}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <MapPinIcon className="h-4 w-4" />
-                      <span>{event.location}</span>
+                      <span>{event.place.name}</span>
                     </div>
                   </div>
                 </CardHeader>
@@ -89,7 +82,7 @@ export default function UserDashboard() {
                   </p>
                 </CardContent>
                 <CardFooter className="justify-end">
-                  <Link href={`/dashboard/${event.id}`} passHref>
+                  <Link href={`/user/dashboard/${event.uuid}`} passHref>
                     <Button>Mais Informações</Button>
                   </Link>
                 </CardFooter>

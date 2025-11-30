@@ -26,6 +26,17 @@ export const events: Event[] = [
     date: '01-02 de Janeiro, 2026',
     location: 'Tóquio, Japão',
     description: 'Uma evento de teste qualquer.',
+  },
+  {
+    id: 1,
+    name: "Congresso Brasileiro de Software 2025",
+    date: "2025-10-20",   
+    location: "Centro de Convenções PUCRS, Porto Alegre",
+    description: `O CBSoft é um dos principais eventos da Sociedade Brasileira de Computação.
+    
+    O evento contará com trilhas de Engenharia de Software, Sistemas de Informação e diversas palestras internacionais.
+    
+    Contamos com a presença de todos os associados.`,
   }
 ];
 
