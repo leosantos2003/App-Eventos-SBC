@@ -5,6 +5,7 @@ export const Routes = Object.freeze({
   users: `${BASE_URL}/users/`,
   me: `${BASE_URL}/me/`,
   token: `${BASE_URL}/token/`,
+  refreshToken: `${BASE_URL}/token/refresh/`,
   user: (uuid: string) => `${BASE_URL}/users/${uuid}/`,
   events: `${BASE_URL}/events/`,
   event: (uuid: string) => `${BASE_URL}/events/${uuid}/`,
