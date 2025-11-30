@@ -15,7 +15,7 @@ import { getAllEvents } from "@/lib/api/events";
 import { useEffect, useState } from "react";
 import { Event } from "@/types/index";
 import { getEventStatus } from "@/lib/utils";
-import { formatDate } from "@/lib/utils";
+import { formatDatePtBr } from "@/lib/utils";
 
 export default function AdminDashboard() {
   const [eventList, setEventList] = useState<Event[]>([]);
@@ -74,8 +74,8 @@ export default function AdminDashboard() {
                     <div className="flex items-center gap-2">
                       <CalendarIcon className="h-4 w-4 text-primary shrink-0" />
                       <span>
-                        {formatDate(event.start_date)} -{" "}
-                        {formatDate(event.end_date)}
+                        {formatDatePtBr(event.start_date)} -{" "}
+                        {formatDatePtBr(event.end_date)}
                       </span>
                     </div>
 

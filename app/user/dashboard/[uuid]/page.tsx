@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { CalendarIcon, MapPinIcon, ChevronLeftIcon } from "lucide-react";
 import { getEventByUUID } from "@/lib/api/events";
 import { Event } from "@/types/index";
-import { formatDate } from "@/lib/utils";
+import { formatDatePtBr } from "@/lib/utils";
 
 export default function EventDetailsPage({
   params,
@@ -61,7 +61,7 @@ export default function EventDetailsPage({
           <div className="flex items-center gap-4 text-sm text-muted-foreground pt-2">
             <div className="flex items-center gap-1.5">
               <CalendarIcon className="h-4 w-4" />
-              <span>{formatDate(event.start_date)}</span>
+              <span>{formatDatePtBr(event.start_date)}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <MapPinIcon className="h-4 w-4" />

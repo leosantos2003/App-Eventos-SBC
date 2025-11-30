@@ -49,7 +49,7 @@ export interface DailyValuesPayload {
   days_covered: number;
 }
 
-export interface CreateEventPayload {
+export interface EventPayload {
   name: string;
   start_date: string;
   end_date: string;

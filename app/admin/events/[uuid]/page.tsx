@@ -28,44 +28,23 @@ import { useState, useEffect } from "react";
 import { Event } from "@/types/index";
 import { getEventByUUID } from "@/lib/api/events";
 import { getEventStatus } from "@/lib/utils";
-import { formatDate } from "@/lib/utils";
-import { createEmptyRoleCost, createEmptyPlace } from "@/lib/utils";
-import { Role, RoleLabels } from "@/constants/roles";
-
-const defaultEvent: Event = {
-  uuid: '',
-  name: '',
-  start_date: '',
-  end_date: '',
-  confirmation_limit_date: '',
-  description: '',
-  place: createEmptyPlace(),
-  role_costs: [
-    createEmptyRoleCost(Role.DIRECTORY_MEMBER),
-    createEmptyRoleCost(Role.COUNCIL_MEMBER),
-    createEmptyRoleCost(Role.EDUCATION_COMMISSION),
-    createEmptyRoleCost(Role.REGIONAL_SECRETARY),
-    createEmptyRoleCost(Role.SPECIAL_COMMISSION_COORDINATOR),
-    createEmptyRoleCost(Role.OTHERS),
-  ],
-  created_at: '',
-  created_by: '',
-};
+import { formatDatePtBr } from "@/lib/utils";
+import { createEmptyEvent } from "@/lib/utils";
+import { RoleLabels } from "@/constants/roles";
 
 export default function EventDetailsPage() {
-    const uuid = useParams().uuid as string;
-    const [event, setEvent] = useState<Event>(defaultEvent);
-  
-    useEffect(() => {
-      getEventByUUID(uuid).then(event => {
-        if (event) {
-          setEvent(event);
-          console.log(event.role_costs[1].individual)
-        } else {
-          notFound();
-        }
-      });
-    }, [uuid]);
+  const uuid = useParams().uuid as string;
+  const [event, setEvent] = useState<Event>(createEmptyEvent());
+
+  useEffect(() => {
+    getEventByUUID(uuid).then(event => {
+      if (event) {
+        setEvent(event);
+      } else {
+        notFound();
+      }
+    });
+  }, [uuid]);
 
   const status = getEventStatus(event.start_date, event.end_date);
   const StatusIcon = status.icon;
@@ -95,7 +74,7 @@ export default function EventDetailsPage() {
           <div className="flex flex-col sm:flex-row sm:items-center gap-4 text-muted-foreground text-sm">
             <div className="flex items-center gap-1.5">
               <CalendarIcon className="h-4 w-4" />
-              <span>{formatDate(event.start_date)} até {formatDate(event.end_date)}</span>
+              <span>{formatDatePtBr(event.start_date)} até {formatDatePtBr(event.end_date)}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <MapPinIcon className="h-4 w-4" />
@@ -182,18 +161,18 @@ export default function EventDetailsPage() {
             <CardContent className="grid gap-4 text-sm">
                 <div className="flex justify-between items-center border-b pb-2 border-blue-100">
                     <span className="text-muted-foreground">Início</span>
-                    <span className="font-medium">{formatDate(event.start_date)}</span>
+                    <span className="font-medium">{formatDatePtBr(event.start_date)}</span>
                 </div>
                 <div className="flex justify-between items-center border-b pb-2 border-blue-100">
                     <span className="text-muted-foreground">Término</span>
-                    <span className="font-medium">{formatDate(event.end_date)}</span>
+                    <span className="font-medium">{formatDatePtBr(event.end_date)}</span>
                 </div>
                 <div className="flex justify-between items-center pt-1">
                     <span className="text-muted-foreground flex items-center gap-1">
                         <AlertCircle className="h-3 w-3 text-orange-500" />
                         Limite Pedidos
                     </span>
-                    <span className="font-bold text-orange-700">{formatDate(event.confirmation_limit_date)}</span>
+                    <span className="font-bold text-orange-700">{formatDatePtBr(event.confirmation_limit_date)}</span>
                 </div>
             </CardContent>
           </Card>

@@ -2,15 +2,26 @@ import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { EventStatus, EventStatusLabels } from "@/constants/eventStatus";
 import { Role } from "@/constants/roles";
-import { PlacePayload, DailyValuesPayload } from "@/types/index";
+import { PlacePayload, DailyValuesPayload, Event } from "@/types/index";
 import { CalendarClock, CheckCircle2, Clock } from "lucide-react";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function formatDate(date: string) {
-  return new Date(date).toLocaleDateString('pt-BR');
+export function formatDate(date: string | Date | undefined): string {
+  if (date) {
+    return new Date(date).toISOString().split("T")[0];
+  }
+  return "";
+};
+
+
+export function formatDatePtBr(date: string | Date | undefined): string {
+  if (date) {
+    return new Date(date).toLocaleDateString('pt-BR');
+  }
+  return "";
 }
 
 export function getEventStatus(start: string, end: string) {
@@ -50,5 +61,27 @@ export function createEmptyPlace(): PlacePayload {
     city: "",
     state: "",
     country: "",
+  };
+}
+
+export function createEmptyEvent(): Event {
+  return {
+    uuid: '',
+    name: '',
+    start_date: '',
+    end_date: '',
+    confirmation_limit_date: '',
+    description: '',
+    place: createEmptyPlace(),
+    role_costs: [
+      createEmptyRoleCost(Role.DIRECTORY_MEMBER),
+      createEmptyRoleCost(Role.COUNCIL_MEMBER),
+      createEmptyRoleCost(Role.EDUCATION_COMMISSION),
+      createEmptyRoleCost(Role.REGIONAL_SECRETARY),
+      createEmptyRoleCost(Role.SPECIAL_COMMISSION_COORDINATOR),
+      createEmptyRoleCost(Role.OTHERS),
+    ],
+    created_at: '',
+    created_by: '',
   };
 }

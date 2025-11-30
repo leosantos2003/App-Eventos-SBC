@@ -14,7 +14,7 @@ import { CalendarIcon, ChevronLeftIcon, MapPinIcon } from "lucide-react";
 import { useAuth } from "@/contexts/auth-provider";
 import { Event } from "@/types/index";
 import { getAllEvents } from "@/lib/api/events";
-import { formatDate } from "@/lib/utils";
+import { formatDatePtBr } from "@/lib/utils";
 
 export default function UserDashboard() {
   const { user, loading: authLoading } = useAuth();
@@ -68,7 +68,7 @@ export default function UserDashboard() {
                   <div className="flex items-center gap-4 text-sm text-muted-foreground pt-2">
                     <div className="flex items-center gap-1.5">
                       <CalendarIcon className="h-4 w-4" />
-                      <span>{formatDate(event.start_date)}</span>
+                      <span>{formatDatePtBr(event.start_date)}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <MapPinIcon className="h-4 w-4" />

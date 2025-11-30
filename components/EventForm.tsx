@@ -1,9 +1,9 @@
 "use client";
-import { useState } from "react";
-import Link from "next/link"; // é necessário confia
-import { useRouter } from "next/navigation";
-import { createEvent } from "@/lib/api/events";
-import { CreateEventPayload, PlacePayload, DailyValuesPayload } from "@/types/index";
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { createEvent, updateEvent } from "@/lib/api/events";
+import { EventPayload, DailyValuesPayload } from "@/types/index";
 import { Role, RoleLabels } from "@/constants/roles";
 import EventValuesForm from "@/components/EventValuesForm";
 import {
@@ -17,23 +17,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { createEmptyRoleCost, createEmptyPlace } from "@/lib/utils";
+import { createEmptyRoleCost, createEmptyPlace, formatDate } from "@/lib/utils";
 
 interface EventFormProps {
-  initialData?: CreateEventPayload;
+  initialData?: EventPayload;
 }
 
-const formatDateForInput = (value: string | Date | undefined) => {
-  if (value) {
-    const date = new Date(value);
-    if (!isNaN(date.getTime())) {
-      return date.toISOString().split("T")[0];
-    }
-  }
-  return "";
-};
-
-const defaultValues: CreateEventPayload = {
+const defaultValues: EventPayload = {
   name: "",
   start_date: "",
   end_date: "",
@@ -51,12 +41,20 @@ const defaultValues: CreateEventPayload = {
 };
 
 export default function EventForm({ initialData }: EventFormProps) {
+  const uuid = useParams().uuid as string;
   const router = useRouter();
   const isEditing = !!initialData;
 
-  const [formData, setFormData] = useState<CreateEventPayload>(
+  const [formData, setFormData] = useState<EventPayload>(
     initialData || defaultValues
   );
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData(initialData);
+    }
+  }, [initialData]);
+
 
   const handleBasicChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -84,10 +82,6 @@ export default function EventForm({ initialData }: EventFormProps) {
     }));
   };
 
-  const makeEventCreationPayload = (formData) => {
-    
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -112,19 +106,18 @@ export default function EventForm({ initialData }: EventFormProps) {
     }
 
     try {
-      const event = await createEvent(formData);
-      alert("Evento salvo com sucesso!");
       if (isEditing) {
-        // precisa atualizar isso
-        // router.push(`/admin/events/${(initialData)?.id}`);
+        await updateEvent(formData, uuid);
+        alert("Evento alterado com sucesso!");
+        router.push(`/admin/events/${uuid}`);
       } else {
+        await createEvent(formData);
+        alert("Evento criado com sucesso!");
         router.push("/admin/events");
       }
     } catch (err) {
       console.log(err);
     }
-
-    
   };
 
   return (
@@ -162,7 +155,7 @@ export default function EventForm({ initialData }: EventFormProps) {
                 <Input
                   type="date"
                   name="start_date"
-                  value={formatDateForInput(formData.start_date)}
+                  value={formatDate(formData.start_date)}
                   onChange={handleBasicChange}
                 />
               </div>
@@ -172,7 +165,7 @@ export default function EventForm({ initialData }: EventFormProps) {
                 <Input
                   type="date"
                   name="end_date"
-                  value={formatDateForInput(formData.end_date)}
+                  value={formatDate(formData.end_date)}
                   onChange={handleBasicChange}
                 />
               </div>
@@ -182,7 +175,7 @@ export default function EventForm({ initialData }: EventFormProps) {
                 <Input
                   type="date"
                   name="confirmation_limit_date"
-                  value={formatDateForInput(formData.confirmation_limit_date)}
+                  value={formatDate(formData.confirmation_limit_date)}
                   onChange={handleBasicChange}
                 />
               </div>
@@ -278,12 +271,9 @@ export default function EventForm({ initialData }: EventFormProps) {
 
           <div className="flex justify-end gap-4 pt-4">
             <Button variant="outline" asChild>
-
-              {
-              // tem que atualizar aqui
-              /* <Link href={isEditing ? `/admin/events/${(initialData)?.id}` : "/admin/events"}>
+              <Link href={isEditing ? `/admin/events/${uuid}` : "/admin/events"}>
                 Cancelar
-              </Link> */}
+              </Link>
             </Button>
 
             <Button type="submit">
