@@ -1,45 +1,36 @@
 'use client';
 
-import { notFound, useParams } from "next/navigation";
-import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
-import EventForm from "@/components/EventForm";
-import { AuthLayout } from "@/components/auth/auth-layout";
+import { useParams } from "next/navigation";
+import EventForm from "@/components/events/EventForm";
 import { useState, useEffect } from "react";
 import { getEventByUUID } from "@/lib/api/events";
 import { createEmptyEvent } from "@/lib/utils";
 import { Event } from "@/types/index";
 import { eventToPayload } from "@/lib/mappers/event-mapper";
+import BackButton from "@/components/BackButton";
+import EventNotFound from "@/components/events/EventNotFound";
 
 export default function EditEventPage() {
   const uuid = useParams().uuid as string;
-  const [event, setEvent] = useState<Event>(createEmptyEvent());
+  const [event, setEvent] = useState<Event | null>(createEmptyEvent());
 
   useEffect(() => {
     getEventByUUID(uuid).then(event => {
-      if (event) {
-        setEvent(event);
-      } else {
-        notFound();
-      }
+      setEvent(event);
+    }).catch((err) => {
+      console.log(err);
+      setEvent(null);
     });
   }, [uuid]);
 
-  return (
-    <AuthLayout>
+  if (event) {
+    return (
       <div className="max-w-5xl mx-auto py-10 px-4">
-        <div className="mb-6">
-          <Button variant="ghost" asChild className="pl-0 hover:pl-2 transition-all text-muted-foreground">
-            <Link href={`/admin/events/${uuid}`}>
-              <ChevronLeft className="mr-2 h-4 w-4" />
-              Voltar para Detalhes
-            </Link>
-          </Button>
-        </div>
+        <BackButton route={`/admin/events/${uuid}`} />
         <EventForm initialData={eventToPayload(event)} />
       </div>
-    </AuthLayout>
-  );
+    );
+  } else {
+    return <EventNotFound route="/admin/events" />;
+  }
 }
