@@ -19,6 +19,7 @@ import { ChevronLeftIcon } from "lucide-react";
 import { Event } from "@/types/index";
 import { getEventByUUID } from "@/lib/api/events";
 import { useAuth } from "@/contexts/auth-provider";
+import EventNotFound from "@/components/events/EventNotFound";
 
 type NewRequestData = {
   eventUuid: string;
@@ -298,14 +299,7 @@ export default function RequestForm({ eventUuid }: { eventUuid: string }) {
   }
 
   if (!event) {
-    return (
-      <div className="grow flex flex-col items-center justify-center p-8">
-        <p>Evento não encontrado.</p>
-        <Link href="/user/dashboard">
-            <Button variant="link">Voltar</Button>
-        </Link>
-      </div>
-    );
+    return <EventNotFound route="/user/dashboard" />
   }
 
   return (

@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { createEvent, updateEvent } from "@/lib/api/events";
 import { EventPayload, DailyValuesPayload } from "@/types/index";
 import { Role, RoleLabels } from "@/constants/roles";
-import EventValuesForm from "@/components/EventValuesForm";
+import EventValuesForm from "@/components/events/EventValuesForm";
 import {
   Card,
   CardHeader,
@@ -18,10 +18,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { createEmptyRoleCost, createEmptyPlace, formatDate } from "@/lib/utils";
-
-interface EventFormProps {
-  initialData?: EventPayload;
-}
 
 const defaultValues: EventPayload = {
   name: "",
@@ -40,7 +36,7 @@ const defaultValues: EventPayload = {
   ],
 };
 
-export default function EventForm({ initialData }: EventFormProps) {
+export default function EventForm({ initialData }: { initialData?: EventPayload }) {
   const uuid = useParams().uuid as string;
   const router = useRouter();
   const isEditing = !!initialData;
