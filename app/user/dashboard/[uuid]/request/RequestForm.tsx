@@ -21,8 +21,8 @@ import { useAuth } from "@/contexts/auth-provider";
 import EventNotFound from "@/components/events/EventNotFound";
 import { formatDatePtBr } from "@/lib/utils";
 import { Role, RoleLabels, RoomType, RoomTypeLabels, TravelTime, TravelTimeLabels, RequestStatus } from "@/constants/index";
+import { createRequest } from "@/lib/api/requests";
 import { cpf } from "cpf-cnpj-validator";
-import { Table } from "@/components/ui/table";
 
 export default function RequestForm() {
   const uuid = useParams().uuid as string;
@@ -73,37 +73,9 @@ export default function RequestForm() {
     return parsed?.isValid() ?? false;
   }
 
-  function validateForm(formData: FormData) {
-    if (!isPhoneNumberValid(phoneNumberValue)) {
-      alert("Por favor, insira um número de telefone válido.");
-      return false;
-    }
-    if (role === 0) {
-      alert("Por favor, selecione um cargo.");
-      return false;
-    }
-    if (roomType === 0) {
-      alert("Por favor, selecione um tipo de quarto.");
-      return false;
-    }
-    if (departureTime === 0 && showTravelForm) {
-      alert("Por favor, selecione um turno de partida.");
-      return false;
-    }
-    const returnDate = formData.get("return-date");
-    if (returnTime === 0 && returnDate && showTravelForm) {
-      alert("Por favor, selecione um turno de retorno.");
-      return false;
-    }
-    if (returnTime !== 0 && !returnDate && showTravelForm) {
-      alert("Selecione um turno de retorno apenas se selecionar uma data de retorno.");
-      return false;
-    }
-    return true;
-  }
-
-  function getValidatedData(formData: FormData) {
+  function getValidatedData(formData: FormData): RequestPayload {
     const error = new Error("Validation Error");
+    if (!event) throw error;
 
     if (!isPhoneNumberValid(phoneNumberValue)) {
       alert("Por favor, insira um número de telefone válido.");
@@ -121,10 +93,10 @@ export default function RequestForm() {
       alert("Por favor, selecione um turno de partida.");
       throw error;
     }
-    const checkinDate = String(formData.get("checkin-date"));
-    const checkoutDate = String(formData.get("checkout-date"));
-    const departureDate = String(formData.get("departure-date"));
-    const returnDate = String(formData.get("return-date"));
+    const checkinDate = formData.get("checkin-date") as string;
+    const checkoutDate = formData.get("checkout-date") as string;
+    const departureDate = formData.get("departure-date") as string;
+    const returnDate = formData.get("return-date") as string;
 
     const checkinDateObj = new Date(checkinDate + "T00:00:00");
     const checkoutDateObj = new Date(checkoutDate + "T00:00:00");
@@ -133,10 +105,8 @@ export default function RequestForm() {
 
     if (checkoutDateObj < checkinDateObj) {
       alert("A data de check-out não pode ser anterior à data de check-in.");
-      return false;
+      throw error;
     }
-    console.log("checkinDateObj", checkinDateObj);
-    console.log("checkoutDateObj", checkoutDateObj);
     
     if (showTravelForm) {
       if (returnTime === 0 && returnDate) {
@@ -154,47 +124,16 @@ export default function RequestForm() {
         alert("A data do voo de retorno não pode ser anterior à data de check-out.");
         throw error;
       }
-      console.log("departureDateObj", departureDateObj);
-      console.log("returnDateObj", returnDateObj);
     }
-  }
 
-  function handleSubmit (e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    if (!event || !user) return;
-
-    const formData = new FormData(e.currentTarget);
-    try {
-      const payload = getValidatedData(formData);  
-    } catch {
-      return;
-    }
-    
-    if (!validateForm(formData)) return;
-
-    const institution = String(formData.get("institution"));
+    const institution = formData.get("institution") as string;
     const peopleCount = Number(formData.get("people-count"));
-    const checkinDate = String(formData.get("checkin-date"));
-    const checkoutDate = String(formData.get("checkout-date"));
-    const specialNeeds = String(formData.get("special-needs"));
-    const originCity = String(formData.get("origin-city"));
-    const originState = String(formData.get("origin-state"));
-    const originAirport = String(formData.get("origin-airport"));
-    const departureDate = String(formData.get("departure-date"));
-    const returnDate = String(formData.get("return-date"));
-    // const expectedPayment = Number(formData.get("expected-payment"));
-    // const valuePaid = Number(formData.get("value-paid"));
+    const specialNeeds = formData.get("special-needs") as string;
+    const originCity = formData.get("origin-city") as string;
+    const originState = formData.get("origin-state") as string;
+    const originAirport = formData.get("origin-airport") as string;
 
-    // const rawNumberOfPeople = formData.get("people-count");
-    // const rawSpecialNeeds = formData.get("special-needs");
-
-    // const checkin = typeof rawCheckin === "string" ? rawCheckin : "";
-    // const checkout = typeof rawCheckout === "string" ? rawCheckout : "";
-    // const numberOfPeople = typeof rawNumberOfPeople === "string" ? parseInt(rawNumberOfPeople, 10) : NaN;
-    // const specialNeeds = typeof rawSpecialNeeds === "string" ? rawSpecialNeeds.trim() : "";
-
-    const payload: RequestPayload = {
-      user: user.uuid,
+    return {
       event: event.uuid,
       phone_number: phoneNumberValue,
       institution: institution?.trim() ?? null,
@@ -208,53 +147,27 @@ export default function RequestForm() {
       origin_state: originState,
       origin_airport: originAirport,
       departure_date: departureDate,
-      departure_preferred_time: departureTime as TravelTime,
+      departure_preferred_time: departureTime === 0 ? undefined : (departureTime),
       return_date: returnDate,
-      return_preferred_time: returnTime as TravelTime,
+      return_preferred_time: returnTime === 0 ? undefined : (returnTime),
       expected_payment: 0,
       value_paid: 0,
       status: RequestStatus.PENDING
     };
+  }
 
-    // setSubmittedData(newRequestData);
+  async function handleSubmit (e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!event || !user) return;
 
-    if (showTravelForm) {
-      const rawDepart = formData.get("depart-date");
-      const rawdepartureTime = formData.get("departure-time");
-      const rawReturn = formData.get("return-date");
-      const rawReturnOrigin = formData.get("return-origin");
-      const rawReturnDestination = formData.get("return-destination");
-      const rawReturnShift = formData.get("return-shift");
-
-      const departDate = typeof rawDepart === "string" ? rawDepart : "";
-      const departureTimeValue = typeof rawdepartureTime === "string" ? rawdepartureTime : "";
-      const returnDate = typeof rawReturn === "string" ? rawReturn : "";
-      const returnOrigin = typeof rawReturnOrigin === "string" ? rawReturnOrigin.trim() : "";
-      const returnDestination = typeof rawReturnDestination === "string" ? rawReturnDestination.trim() : "";
-      const returnShiftValue = typeof rawReturnShift === "string" ? rawReturnShift : "";
-
-      if (!departDate) {
-        alert("Por favor informe a data de ida.");
-        return;
-      }
-      if (!departureTimeValue) {
-        alert("Por favor selecione o turno da viagem de ida.");
-        return;
-      }
-      if (returnDate && (!returnOrigin || !returnDestination || !returnShiftValue)) {
-        alert("Se informar data de volta, preencha origem/destino/turno da volta.");
-        return;
-      }
-
-      alert("Solicitação enviada com passagem (simulada). Redirecionando para pagamento...");
-      // router.push(`/user/payment`);
-      return;
+    const formData = new FormData(e.currentTarget);
+    try {
+      await createRequest(getValidatedData(formData));
+      alert("Solicitação enviada com sucesso. Redirecionando para pagamento...");
+      router.push(`/user/payment`);
+    } catch {
+      alert("Erro ao enviar solicitação. Entre em contato com um administrador do sistema.");
     }
-
-    // Aqui tem que fazer o POST real para a API
-    // console.log("Dados para envio:", newRequestData);
-    
-    // router.push(`/user/payment`);
   };
 
   if (loading) {
@@ -553,7 +466,7 @@ export default function RequestForm() {
                 </div>
               )}
 
-              <div className="mt-4 p-4 border rounded">
+              {/* <div className="mt-4 p-4 border rounded">
                 <p className="text-sm">Custo da solicitação</p>
                 <p>Valor por diária extra</p>
                 <div className="border rounded-lg overflow-x-auto">
@@ -595,7 +508,7 @@ export default function RequestForm() {
                     </tbody>
                   </table>
                 </div>
-              </div>
+              </div> */}
 
               <div className="pt-4">
                 <Button type="submit" className="w-full">

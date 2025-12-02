@@ -1,8 +1,9 @@
 import { RequestStatus, Role, RoomType, TravelTime } from "@/constants/index";
+import { User } from "./user";
 
 export interface Request {
   uuid: string;
-  user: string;
+  user: User;
   event: string;
   phone_number: string;
   institution?: string;
@@ -26,7 +27,6 @@ export interface Request {
 }
 
 export interface RequestPayload {
-  user: string;
   event: string;
   phone_number: string;
   institution?: string;
