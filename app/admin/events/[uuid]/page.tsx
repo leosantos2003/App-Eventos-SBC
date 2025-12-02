@@ -16,12 +16,12 @@ import {
   Users,
   FileBarChart,
   DollarSign,
-  Loader2, // <--- 1. Adicionado Loader2
+  Loader2,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Event } from "@/types/index";
 import { getEventByUUID } from "@/lib/api/events";
-import { Routes } from "@/config/routes"; // <--- 2. Adicionado Routes
+import { Routes } from "@/config/routes";
 import { createEmptyEvent } from "@/lib/utils";
 import { RoleLabels } from "@/constants/index";
 import EventNotFound from "@/components/events/EventNotFound";
@@ -35,7 +35,6 @@ export default function EventDetailsPage() {
   const uuid = useParams().uuid as string;
   const [event, setEvent] = useState<Event | null>(createEmptyEvent());
   
-  // <--- 3. Estado de download
   const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
@@ -47,9 +46,8 @@ export default function EventDetailsPage() {
     });
   }, [uuid]);
 
-  // <--- 4. Função de Download
   const handleDownloadReport = async () => {
-    if (!event) return; // Segurança extra
+    if (!event) return;
 
     try {
       setIsDownloading(true);
@@ -151,7 +149,6 @@ export default function EventDetailsPage() {
 
                 <Separator className="my-2" />
 
-                {/* <--- 5. Botão Atualizado com Lógica de Download */}
                 <Button 
                   onClick={handleDownloadReport}
                   disabled={isDownloading}

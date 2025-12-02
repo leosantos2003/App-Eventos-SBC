@@ -27,14 +27,16 @@ import {
   FileText,
   CheckCircle2,
   XCircle,
-  Clock
+  Clock,
+  Edit
 } from "lucide-react";
 import BackButton from "@/components/BackButton";
 import { User, Request as ApiRequest } from "@/types/index";
 import { Role, RoomType, TravelTime, RequestStatus, RoleLabels, RoomTypeLabels } from "@/constants/index";
 import { formatDatePtBr } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
-// --- NOVOS DADOS MOCKADOS (Substituindo os antigos) ---
+// --- DADOS MOCKADOS ---
 
 const MOCK_USERS: User[] = [
   {
@@ -178,7 +180,6 @@ const MOCK_API_REQUESTS: ApiRequest[] = [
   }
 ];
 
-// Interface unificada para UI
 export interface ParticipantUI {
   id: string;
   userName: string;
@@ -191,13 +192,13 @@ export interface ParticipantUI {
   roomType: string;
   specialRequests?: string;
   status: "Pendente" | "Aprovada" | "Rejeitada" | "Aguardando Pagamento";
-  rawValueStatus: RequestStatus; // Mantendo o enum original para lógica
+  rawValueStatus: RequestStatus;
 }
 
 export default function ParticipantsPage() {
   const eventId = useParams().uuid as string;
+  const router = useRouter();
 
-  // Inicializa o estado usando os NOVOS mocks e fazendo o mapeamento User + Request
   const [participants, setParticipants] = useState<ParticipantUI[]>(() => {
     return MOCK_API_REQUESTS.map((req) => {
       const user = MOCK_USERS.find((u) => u.uuid === req.user);
@@ -237,6 +238,10 @@ export default function ParticipantsPage() {
       p.id === id ? { ...p, rawValueStatus: newStatus, status: newUiStatus } : p
     ));
     setIsDetailsOpen(false);
+  };
+
+  const handleEditParticipant = (participant: ParticipantUI) => {
+    router.push(`/admin/events/${eventId}/participants/${participant.id}/edit`);
   };
 
   const renderBadge = (status: ParticipantUI["status"]) => {
@@ -284,7 +289,6 @@ export default function ParticipantsPage() {
             </div>
 
             <div className="w-full sm:w-auto flex justify-end gap-2">
-              {/* Botões de ação rápida para pendentes */}
               {(p.status === "Pendente" || p.status === "Aguardando Pagamento") && (
                 <>
                   <Button size="icon" variant="ghost" className="text-red-600 hover:bg-red-50" onClick={() => handleStatusChange(p.id, RequestStatus.REJECTED, "Rejeitada")} title="Rejeitar">
@@ -296,6 +300,7 @@ export default function ParticipantsPage() {
                 </>
               )}
               
+
               <Button 
                 variant="outline" 
                 onClick={() => openDetails(p)}
@@ -375,7 +380,6 @@ export default function ParticipantsPage() {
 
           {selected && (
             <div className="space-y-6 py-4">
-              
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1">
                     <span className="text-xs font-medium text-muted-foreground flex items-center gap-1">
@@ -450,6 +454,15 @@ export default function ParticipantsPage() {
               {(selected?.status === "Pendente" || selected?.status === "Aguardando Pagamento") ? (
                 <>
                   <Button variant="outline" onClick={() => setIsDetailsOpen(false)}>Cancelar</Button>
+                  
+                  <Button 
+                    variant="secondary" 
+                    onClick={() => selected && handleEditParticipant(selected)}
+                    title="Editar Solicitação"
+                  >
+                    <Edit className="h-4 w-4 mr-2" /> Editar
+                  </Button>
+
                   <Button 
                     variant="destructive" 
                     onClick={() => selected && handleStatusChange(selected.id, RequestStatus.REJECTED, "Rejeitada")}
@@ -465,6 +478,17 @@ export default function ParticipantsPage() {
                 </>
               ) : (
                 <>
+                  {selected?.status === "Aprovada" && (
+                    <Button 
+                      variant="outline" 
+                      onClick={() => selected && handleEditParticipant(selected)}
+                      title="Editar Solicitação"
+                      className="mr-auto" 
+                    >
+                      <Edit className="h-4 w-4 mr-2" /> Editar
+                    </Button>
+                  )}
+
                   <Button variant="ghost" onClick={() => setIsDetailsOpen(false)}>Fechar</Button>
                   {selected?.status === "Aprovada" && (
                     <Button 
