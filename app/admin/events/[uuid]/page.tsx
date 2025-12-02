@@ -17,10 +17,12 @@ import {
   ClipboardList,
   FileBarChart,
   DollarSign,
+  Loader2, // <--- 1. Adicionado Loader2
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Event } from "@/types/index";
 import { getEventByUUID } from "@/lib/api/events";
+import { Routes } from "@/config/routes"; // <--- 2. Adicionado Routes
 import { createEmptyEvent } from "@/lib/utils";
 import { RoleLabels } from "@/constants/roles";
 import EventNotFound from "@/components/events/EventNotFound";
@@ -28,10 +30,14 @@ import EventTitle from "@/components/events/EventTitle";
 import BackButton from "@/components/BackButton";
 import EventGeneralInfo from "@/components/events/EventGeneralInfo";
 import EventSchedule from "@/components/events/EventSchedule";
+import { downloadEventReport } from "@/lib/api/report";
 
 export default function EventDetailsPage() {
   const uuid = useParams().uuid as string;
   const [event, setEvent] = useState<Event | null>(createEmptyEvent());
+  
+  // <--- 3. Estado de download
+  const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
     getEventByUUID(uuid).then(event => {
@@ -41,6 +47,35 @@ export default function EventDetailsPage() {
       setEvent(null);
     });
   }, [uuid]);
+
+  // <--- 4. Função de Download
+  const handleDownloadReport = async () => {
+    if (!event) return; // Segurança extra
+
+    try {
+      setIsDownloading(true);
+
+      const response = await downloadEventReport(Routes.eventReport(uuid));
+      
+      const url = window.URL.createObjectURL(response);
+      const a = document.createElement("a");
+      a.href = url;
+      
+      a.download = `report_${event.name.replace(/\s+/g, "_")}.xlsx`;
+      
+      document.body.appendChild(a);
+      a.click();
+      
+      a.remove();
+      window.URL.revokeObjectURL(url);
+
+    } catch (error) {
+      console.error("Download error:", error);
+      alert("Erro ao baixar o relatório. Verifique suas permissões.");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
   
   if (event) {
     return (
@@ -126,9 +161,18 @@ export default function EventDetailsPage() {
 
                 <Separator className="my-2" />
 
-                <Button className="justify-start h-12 w-full bg-slate-900 hover:bg-slate-800 text-white">
-                    <FileBarChart className="mr-3 h-4 w-4" />
-                    Relatório Final
+                {/* <--- 5. Botão Atualizado com Lógica de Download */}
+                <Button 
+                  onClick={handleDownloadReport}
+                  disabled={isDownloading}
+                  className="justify-start h-12 w-full bg-slate-900 hover:bg-slate-800 text-white"
+                >
+                   {isDownloading ? (
+                      <Loader2 className="mr-3 h-4 w-4 animate-spin" />
+                   ) : (
+                      <FileBarChart className="mr-3 h-4 w-4" />
+                   )}
+                   {isDownloading ? "Gerando..." : "Relatório Final"}
                 </Button>
               </CardContent>
             </Card>

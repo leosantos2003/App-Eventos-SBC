@@ -8,6 +8,7 @@ export async function executeRequest<T>(path: string, init?: RequestInit): Promi
   if (!res.ok) {
     if (res.status === 401 && token) {
       const newToken = await refreshAccessToken();
+      localStorage.setItem("access", newToken);
       res = await sendRequest(path, init, newToken);
 
       if (!res.ok) {
