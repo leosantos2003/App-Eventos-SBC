@@ -30,6 +30,7 @@ import EventTitle from "@/components/events/EventTitle";
 import BackButton from "@/components/BackButton";
 import EventGeneralInfo from "@/components/events/EventGeneralInfo";
 import EventSchedule from "@/components/events/EventSchedule";
+import { downloadEventReport } from "@/lib/api/report";
 
 export default function EventDetailsPage() {
   const uuid = useParams().uuid as string;
@@ -54,23 +55,9 @@ export default function EventDetailsPage() {
     try {
       setIsDownloading(true);
 
-      const token = localStorage.getItem("access_token"); 
-
-      // Usando a rota centralizada
-      const response = await fetch(Routes.eventReport(uuid), {
-        method: "GET",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to generate report");
-      }
-
-      const blob: Blob = await response.blob();
+      const response = await downloadEventReport(Routes.eventReport(uuid));
       
-      const url = window.URL.createObjectURL(blob);
+      const url = window.URL.createObjectURL(response);
       const a = document.createElement("a");
       a.href = url;
       
