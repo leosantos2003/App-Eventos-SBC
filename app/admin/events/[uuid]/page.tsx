@@ -14,7 +14,6 @@ import { Separator } from "@/components/ui/separator";
 import {
   Edit,
   Users,
-  ClipboardList,
   FileBarChart,
   DollarSign,
 } from "lucide-react";
@@ -111,16 +110,7 @@ export default function EventDetailsPage() {
                 <Button asChild variant="outline" className="justify-start h-12 w-full hover:bg-purple-50 hover:text-purple-700 border-gray-200">
                   <Link href={`/admin/events/${event.uuid}/participants`}>
                     <Users className="mr-3 h-4 w-4 text-purple-600" />
-                    Participantes
-                  </Link>
-                </Button>
-
-                <Button asChild variant="outline" className="justify-start h-12 w-full hover:bg-orange-50 hover:text-orange-700 border-gray-200 group">
-                  <Link href={`/admin/events/${event.uuid}/requests`} className="flex justify-between w-full items-center">
-                    <div className="flex items-center">
-                      <ClipboardList className="mr-3 h-4 w-4 text-orange-600" />
-                      Solicitações
-                    </div>
+                    Gestão de Participantes
                   </Link>
                 </Button>
 
