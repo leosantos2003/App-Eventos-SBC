@@ -11,7 +11,8 @@ export const Routes = Object.freeze({
   event: (uuid: string) => `${BASE_URL}/events/${uuid}/`,
   requests: `${BASE_URL}/requests/`,
   requestsByEvent: (eventId: number) => `${BASE_URL}/requests?event=${eventId}`,
-  request: (uuid:string) => `${BASE_URL}/requests/${uuid}`
+  request: (uuid:string) => `${BASE_URL}/requests/${uuid}`,
+  eventReport: (uuid: string) => `${BASE_URL}/events/${uuid}/generate-report/`
   // requestsReportXlsx: (q = "") => `/reports/requests.xlsx${q}`,
-
+  
 });
