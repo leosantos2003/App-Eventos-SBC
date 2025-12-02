@@ -21,11 +21,13 @@ import {
   Eye, 
   Pencil,
   CalendarDays,
-  User,
+  User as UserIcon,
   BedDouble,
   FileText
 } from "lucide-react";
 import BackButton from "@/components/BackButton";
+import { User, Event, Request as ApiRequest } from "@/types/index";
+import { Role, RoomType, TravelTime, RequestStatus } from "@/constants/index";
 
 export interface Request {
   id: number; 
@@ -41,6 +43,148 @@ export interface Request {
   userCategory: string;
   userEmail: string;
 }
+
+export const MOCK_USERS: User[] = [
+  {
+    uuid: "user-001",
+    name: "Alice Johnson",
+    email: "alice.johnson@example.com",
+    cpf: "123.456.789-00",
+    passport_number: 0,
+    passport_country: "",
+    birth_date: "1985-04-12",
+    is_staff: false
+  },
+  {
+    uuid: "user-002",
+    name: "Bob Smith",
+    email: "bob.smith@example.com",
+    cpf: "234.567.890-11",
+    passport_number: 0,
+    passport_country: "",
+    birth_date: "1990-08-25",
+    is_staff: true
+  },
+  {
+    uuid: "user-003",
+    name: "Charlie Davis",
+    email: "charlie.davis@example.com",
+    cpf: "",
+    passport_number: 987654321,
+    passport_country: "USA",
+    birth_date: "1982-12-05",
+    is_staff: false
+  },
+  {
+    uuid: "user-004",
+    name: "Diana Evans",
+    email: "diana.evans@example.com",
+    cpf: "456.789.012-33",
+    passport_number: 0,
+    passport_country: "",
+    birth_date: "1995-03-15",
+    is_staff: false
+  },
+  {
+    uuid: "user-005",
+    name: "Evan Wright",
+    email: "evan.wright@example.com",
+    cpf: "567.890.123-44",
+    passport_number: 0,
+    passport_country: "",
+    birth_date: "1988-07-20",
+    is_staff: true
+  }
+];
+
+export const MOCK_API_REQUESTS: ApiRequest[] = [
+  {
+    uuid: "req-001",
+    user: "user-001",
+    event: "evt-100",
+    phone_number: "+5511988887777",
+    institution: "University of Tech",
+    role: Role.DIRECTORY_MEMBER,
+    room_type: RoomType.SINGLE,
+    people_count: 1,
+    checkin_date: "2025-11-20",
+    checkout_date: "2025-11-25",
+    special_needs: "Wheelchair access",
+    origin_city: "Sao Paulo",
+    origin_state: "SP",
+    origin_airport: "GRU",
+    departure_date: "2025-11-20",
+    departure_preferred_time: TravelTime.MORNING,
+    return_date: "2025-11-25",
+    return_preferred_time: TravelTime.EVENING,
+    expected_payment: 0,
+    value_paid: 0,
+    status: RequestStatus.PENDING,
+    created_at: "2025-01-15T10:00:00Z"
+  },
+  {
+    uuid: "req-002",
+    user: "user-002",
+    event: "evt-100",
+    phone_number: "+5521999998888",
+    role: Role.COUNCIL_MEMBER,
+    room_type: RoomType.DOUBLE,
+    people_count: 2,
+    checkin_date: "2025-11-21",
+    checkout_date: "2025-11-24",
+    expected_payment: 500,
+    value_paid: 500,
+    status: RequestStatus.APPROVED,
+    created_at: "2025-01-16T14:30:00Z"
+  },
+  {
+    uuid: "req-003",
+    user: "user-003",
+    event: "evt-100",
+    phone_number: "+15550199",
+    institution: "Global Corp",
+    role: Role.OTHERS,
+    room_type: RoomType.SINGLE,
+    people_count: 1,
+    checkin_date: "2025-11-19",
+    checkout_date: "2025-11-26",
+    special_needs: "Vegan meals",
+    expected_payment: 2000,
+    value_paid: 0,
+    status: RequestStatus.REJECTED,
+    created_at: "2025-01-17T09:15:00Z"
+  },
+  {
+    uuid: "req-004",
+    user: "user-004",
+    event: "evt-100",
+    phone_number: "+5531977776666",
+    role: Role.REGIONAL_SECRETARY,
+    room_type: RoomType.DOUBLE,
+    people_count: 2,
+    checkin_date: "2025-11-20",
+    checkout_date: "2025-11-25",
+    expected_payment: 0,
+    value_paid: 0,
+    status: RequestStatus.PENDING,
+    created_at: "2025-01-18T11:45:00Z"
+  },
+  {
+    uuid: "req-005",
+    user: "user-005",
+    event: "evt-100",
+    phone_number: "+5541966665555",
+    role: Role.EDUCATION_COMMISSION,
+    room_type: RoomType.SINGLE,
+    people_count: 1,
+    checkin_date: "2025-11-20",
+    checkout_date: "2025-11-23",
+    expected_payment: 0,
+    value_paid: 0,
+    status: RequestStatus.AWAITING_PAYMENT,
+    created_at: "2025-01-19T16:20:00Z"
+  }
+];
 
 const MOCK_REQUESTS: Request[] = [
   {
@@ -209,7 +353,7 @@ export default function ManageRequestsPage() {
             <div className="grid gap-4 py-4">
               <div className="space-y-3">
                 <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <User className="h-4 w-4" /> Dados do Participante
+                  <UserIcon className="h-4 w-4" /> Dados do Participante
                 </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-3 bg-muted/50 rounded-md text-sm">
                   <div>
