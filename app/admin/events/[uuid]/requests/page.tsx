@@ -25,6 +25,7 @@ import {
   BedDouble,
   FileText
 } from "lucide-react";
+import BackButton from "@/components/BackButton";
 
 export interface Request {
   id: number; 
@@ -71,8 +72,7 @@ const MOCK_REQUESTS: Request[] = [
 ];
 
 export default function ManageRequestsPage() {
-  const params = useParams();
-  const eventId = params.id; 
+  const eventId = useParams().uuid as string;
 
   const [requests, setRequests] = useState<Request[]>(MOCK_REQUESTS);
   const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
@@ -110,11 +110,7 @@ export default function ManageRequestsPage() {
   return (
     <div className="p-6">
       <div className="mb-6 flex items-center gap-4">
-        <Link href={`/admin/events/${eventId}`}>
-          <Button variant="outline" size="icon">
-            <ChevronLeftIcon className="h-4 w-4" />
-          </Button>
-        </Link>
+        <BackButton route={`/admin/events/${eventId}`} />
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Solicitações Pendentes</h1>
           <p className="text-muted-foreground text-sm">

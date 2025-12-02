@@ -27,6 +27,7 @@ import {
   BedDouble,
   FileText
 } from "lucide-react";
+import BackButton from "@/components/BackButton";
 
 export interface Participant {
   id: number;
@@ -104,11 +105,7 @@ export default function ParticipantsPage() {
   return (
     <div className="p-6 max-w-5xl mx-auto">
       <div className="mb-8 flex items-center gap-4">
-        <Link href={`/admin/events/${eventId}`}>
-          <Button variant="outline" size="icon">
-            <ChevronLeftIcon className="h-4 w-4" />
-          </Button>
-        </Link>
+        <BackButton route={`/admin/events/${eventId}`} />
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Lista de Participantes</h1>
           <p className="text-muted-foreground text-sm">
