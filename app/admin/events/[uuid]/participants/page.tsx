@@ -84,8 +84,7 @@ const MOCK_PARTICIPANTS: Participant[] = [
 ];
 
 export default function ParticipantsPage() {
-  const params = useParams();
-  const eventId = params.id;
+  const eventId = useParams().uuid as string;
 
   const [participants] = useState<Participant[]>(MOCK_PARTICIPANTS);
   const [selected, setSelected] = useState<Participant | null>(null);

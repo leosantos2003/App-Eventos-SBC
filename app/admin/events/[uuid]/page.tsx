@@ -22,7 +22,7 @@ import { useState, useEffect } from "react";
 import { Event } from "@/types/index";
 import { getEventByUUID } from "@/lib/api/events";
 import { createEmptyEvent } from "@/lib/utils";
-import { RoleLabels } from "@/constants/roles";
+import { RoleLabels } from "@/constants/index";
 import EventNotFound from "@/components/events/EventNotFound";
 import EventTitle from "@/components/events/EventTitle";
 import BackButton from "@/components/BackButton";
@@ -58,7 +58,7 @@ export default function EventDetailsPage() {
                   <DollarSign className="h-5 w-5 text-green-600" />
                   Tabela de Custos e Cobertura
                 </CardTitle>
-                <CardDescription>Valores e diárias cobertas pela SBC por categoria.</CardDescription>
+                <CardDescription>Valores e noites cobertas pela SBC por categoria.</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="border rounded-lg overflow-x-auto">
@@ -68,8 +68,8 @@ export default function EventDetailsPage() {
                         <th className="px-4 py-3 min-w-[150px]">Categoria</th>
                         <th className="px-4 py-3">Individual</th>
                         <th className="px-4 py-3">Duplo</th>
-                        <th className="px-4 py-3">Convidado</th>
-                        <th className="px-4 py-3 bg-green-50 text-green-700">Cob. (Dias)</th>
+                        <th className="px-4 py-3">Com Convidado</th>
+                        <th className="px-4 py-3 bg-green-50 text-green-700">Cob. (Noites)</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y">

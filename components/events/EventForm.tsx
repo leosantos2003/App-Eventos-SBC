@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { createEvent, updateEvent } from "@/lib/api/events";
 import { EventPayload, DailyValuesPayload } from "@/types/index";
-import { Role, RoleLabels } from "@/constants/roles";
+import { Role, RoleLabels } from "@/constants/index";
 import EventValuesForm from "@/components/events/EventValuesForm";
 import {
   Card,

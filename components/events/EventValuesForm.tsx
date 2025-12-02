@@ -1,6 +1,6 @@
 "use client";
 
-import { Role, RoleLabels } from "@/constants/roles";
+import { Role, RoleLabels } from "@/constants/index";
 import { DailyValuesPayload } from "@/types/index";
 
 interface Props {
@@ -19,7 +19,7 @@ export default function EventValuesForm({ costs, onChange }: Props) {
         <div className="col-span-1">Categoria</div>
         <div>Individual (R$)</div>
         <div>Duplo (R$)</div>
-        <div>Convidado (R$)</div>
+        <div>Duplo com Convidado (R$)</div>
         <div>Qtd. Coberta</div>
       </div>
 

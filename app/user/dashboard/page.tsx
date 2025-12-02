@@ -53,8 +53,7 @@ export default function UserDashboard() {
           Olá, {user.name}!
         </h1>
         <p className="text-muted-foreground">
-          Você foi convidado para os seguintes eventos. Escolha um para
-          interagir.
+          Os seguintes eventos estão disponíveis. Escolha um para interagir.
         </p>
       </div>
 
