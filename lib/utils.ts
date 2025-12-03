@@ -1,7 +1,6 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
-import { EventStatus, EventStatusLabels } from "@/constants/eventStatus";
-import { Role } from "@/constants/roles";
+import { EventStatus, EventStatusLabels, Role } from "@/constants/index";
 import { PlacePayload, DailyValuesPayload, Event } from "@/types/index";
 import { CalendarClock, CheckCircle2, Clock } from "lucide-react";
 
@@ -17,9 +16,10 @@ export function formatDate(date: string | Date | undefined): string {
 };
 
 
-export function formatDatePtBr(date: string | Date | undefined): string {
+export function formatDatePtBr(date: string): string {
   if (date) {
-    return new Date(date).toLocaleDateString('pt-BR');
+    const [year, month, day] = date.split("T")[0].split("-");
+    return `${day}/${month}/${year}`;
   }
   return "";
 }

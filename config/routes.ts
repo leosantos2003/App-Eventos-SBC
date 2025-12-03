@@ -10,9 +10,10 @@ export const Routes = Object.freeze({
   events: `${BASE_URL}/events/`,
   event: (uuid: string) => `${BASE_URL}/events/${uuid}/`,
   requests: `${BASE_URL}/requests/`,
-  requestsByEvent: (eventId: number) => `${BASE_URL}/requests?event=${eventId}`,
-  request: (uuid:string) => `${BASE_URL}/requests/${uuid}`,
+  request: (uuid: string) => `${BASE_URL}/requests/${uuid}/`,
+  requestsByEvent: (uuid: string) => `${BASE_URL}/requests/?event=${uuid}`,
+  requestByUserEvent: (eventUUID: string) => `${BASE_URL}/requests/by-user-event/?event=${eventUUID}`,
+  approveRequest: (uuid: string) => `${BASE_URL}/requests/${uuid}/approve/`,
+  rejectRequest: (uuid: string) => `${BASE_URL}/requests/${uuid}/reject/`,
   eventReport: (uuid: string) => `${BASE_URL}/events/${uuid}/generate-report/`
-  // requestsReportXlsx: (q = "") => `/reports/requests.xlsx${q}`,
-  
 });

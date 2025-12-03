@@ -17,7 +17,7 @@ export async function updateEvent(payload: EventPayload, uuid: string): Promise<
 }
 
 export async function getAllEvents(): Promise<Event[]> {
-  const res = await executeRequest(Routes.events) as PaginatedResponse<Event>;
+  const res = await executeRequest<PaginatedResponse<Event>>(Routes.events);
   return res.results;
 }
 

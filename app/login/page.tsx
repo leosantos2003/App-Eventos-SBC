@@ -58,7 +58,7 @@ export default function LoginPage() {
       <div className="flex flex-col justify-center items-center grow">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle>Login como Convidado</CardTitle>
+            <CardTitle>Login</CardTitle>
             <CardDescription>
               Insira seus dados para acessar o painel de eventos.
             </CardDescription>
@@ -72,7 +72,7 @@ export default function LoginPage() {
                     type="email"
                     id="email"
                     name="email"
-                    placeholder="convidado@sbc.com"
+                    placeholder="email@sbc.br"
                     required
                   />
                 </div>

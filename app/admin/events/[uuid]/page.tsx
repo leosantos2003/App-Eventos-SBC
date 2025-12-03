@@ -14,17 +14,16 @@ import { Separator } from "@/components/ui/separator";
 import {
   Edit,
   Users,
-  ClipboardList,
   FileBarChart,
   DollarSign,
-  Loader2, // <--- 1. Adicionado Loader2
+  Loader2,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Event } from "@/types/index";
 import { getEventByUUID } from "@/lib/api/events";
-import { Routes } from "@/config/routes"; // <--- 2. Adicionado Routes
+import { Routes } from "@/config/routes";
 import { createEmptyEvent } from "@/lib/utils";
-import { RoleLabels } from "@/constants/roles";
+import { RoleLabels } from "@/constants/index";
 import EventNotFound from "@/components/events/EventNotFound";
 import EventTitle from "@/components/events/EventTitle";
 import BackButton from "@/components/BackButton";
@@ -36,7 +35,6 @@ export default function EventDetailsPage() {
   const uuid = useParams().uuid as string;
   const [event, setEvent] = useState<Event | null>(createEmptyEvent());
   
-  // <--- 3. Estado de download
   const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
@@ -48,9 +46,8 @@ export default function EventDetailsPage() {
     });
   }, [uuid]);
 
-  // <--- 4. Função de Download
   const handleDownloadReport = async () => {
-    if (!event) return; // Segurança extra
+    if (!event) return;
 
     try {
       setIsDownloading(true);
@@ -93,7 +90,7 @@ export default function EventDetailsPage() {
                   <DollarSign className="h-5 w-5 text-green-600" />
                   Tabela de Custos e Cobertura
                 </CardTitle>
-                <CardDescription>Valores e diárias cobertas pela SBC por categoria.</CardDescription>
+                <CardDescription>Valores e noites cobertas pela SBC por categoria.</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="border rounded-lg overflow-x-auto">
@@ -103,8 +100,8 @@ export default function EventDetailsPage() {
                         <th className="px-4 py-3 min-w-[150px]">Categoria</th>
                         <th className="px-4 py-3">Individual</th>
                         <th className="px-4 py-3">Duplo</th>
-                        <th className="px-4 py-3">Convidado</th>
-                        <th className="px-4 py-3 bg-green-50 text-green-700">Cob. (Dias)</th>
+                        <th className="px-4 py-3">Com Convidado</th>
+                        <th className="px-4 py-3 bg-green-50 text-green-700">Cob. (Noites)</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y">
@@ -144,24 +141,14 @@ export default function EventDetailsPage() {
                 </Button>
 
                 <Button asChild variant="outline" className="justify-start h-12 w-full hover:bg-purple-50 hover:text-purple-700 border-gray-200">
-                  <Link href={`/admin/events/${event.uuid}/participants`}>
+                  <Link href={`/admin/events/${event.uuid}/requests`}>
                     <Users className="mr-3 h-4 w-4 text-purple-600" />
-                    Participantes
-                  </Link>
-                </Button>
-
-                <Button asChild variant="outline" className="justify-start h-12 w-full hover:bg-orange-50 hover:text-orange-700 border-gray-200 group">
-                  <Link href={`/admin/events/${event.uuid}/requests`} className="flex justify-between w-full items-center">
-                    <div className="flex items-center">
-                      <ClipboardList className="mr-3 h-4 w-4 text-orange-600" />
-                      Solicitações
-                    </div>
+                    Gestão de Solicitações
                   </Link>
                 </Button>
 
                 <Separator className="my-2" />
 
-                {/* <--- 5. Botão Atualizado com Lógica de Download */}
                 <Button 
                   onClick={handleDownloadReport}
                   disabled={isDownloading}

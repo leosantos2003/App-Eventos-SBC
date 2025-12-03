@@ -1,302 +1,431 @@
 "use client";
 
-import React, { useState } from "react";
-import { useParams } from "next/navigation";
-import Link from "next/link";
+import React, { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  ChevronLeftIcon, 
-  CheckCircle2, 
-  XCircle, 
-  Eye, 
-  Pencil,
-  CalendarDays,
-  User,
-  BedDouble,
-  FileText
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+import {
+  Eye, Download, User as UserIcon, Mail, Phone, CreditCard,
+  CalendarDays, BedDouble, FileText, CheckCircle2, XCircle, Clock, Edit
 } from "lucide-react";
 
-export interface Request {
-  id: number; 
-  userId: number;
-  eventId: number;
+import BackButton from "@/components/BackButton";
+import { RoleLabels, RoomTypeLabels, RequestStatus, RequestStatusLabels } from "@/constants";
+import { formatDatePtBr } from "@/lib/utils";
+
+import {
+  getRequestsByEvent,
+  approveRequest,
+  rejectRequest
+} from "@/lib/api/requests";
+
+interface ParticipantUI {
+  id: string;
+  userName: string;
+  userEmail: string;
+  userPhone: string;
+  userCpf: string;
+  userCategory: string;
   checkinDate: string;
   checkoutDate: string;
   roomType: string;
-  specialRequests: string;
-  status: "Pendente" | "Aprovada" | "Rejeitada";
-  
-  userName: string;
-  userCategory: string;
-  userEmail: string;
+  specialRequests?: string;
+  status: string;
+  rawValueStatus: RequestStatus;
 }
 
-const MOCK_REQUESTS: Request[] = [
-  {
-    id: 1,
-    userId: 101,
-    eventId: 1,
-    checkinDate: "2025-11-20",
-    checkoutDate: "2025-11-25",
-    roomType: "Single",
-    specialRequests: "Andar baixo, próximo ao elevador.",
-    status: "Pendente",
-    userName: "José Antonio",
-    userCategory: "Associado",
-    userEmail: "emai@emi.com",
-  },
-  {
-    id: 2,
-    userId: 102,
-    eventId: 1,
-    checkinDate: "2025-11-21",
-    checkoutDate: "2025-11-24",
-    roomType: "Double",
-    specialRequests: "",
-    status: "Pendente",
-    userName: "Joel",
-    userCategory: "Diretoria",
-    userEmail: "joel@mail.com",
-  },
-];
+export default function ParticipantsPage() {
+  const eventId = useParams().uuid as string;
+  const router = useRouter();
 
-export default function ManageRequestsPage() {
-  const params = useParams();
-  const eventId = params.id; 
-
-  const [requests, setRequests] = useState<Request[]>(MOCK_REQUESTS);
-  const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
+  const [participants, setParticipants] = useState<ParticipantUI[]>([]);
+  const [selected, setSelected] = useState<ParticipantUI | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
-  const pendingRequests = requests.filter((r) => r.status === "Pendente");
+  useEffect(() => {
+    async function load() {
+      const requests = await getRequestsByEvent(eventId);
 
-  const handleApprove = (id: number) => {
-    setRequests((prev) =>
-      prev.map((req) => (req.id === id ? { ...req, status: "Aprovada" } : req))
-    );
-    setIsDetailsOpen(false); 
-  };
+      const formatted = requests.map((req) => {
+        const user = req.user;
 
-  const handleReject = (id: number) => {
-    const reason = window.prompt("Motivo da rejeição:");
-    if (reason !== null) {
-      setRequests((prev) =>
-        prev.map((req) => (req.id === id ? { ...req, status: "Rejeitada" } : req))
-      );
-      setIsDetailsOpen(false);
+        let uiStatus: ParticipantUI["status"] = "Pendente";
+        if (req.status === RequestStatus.APPROVED) uiStatus = RequestStatusLabels[RequestStatus.APPROVED];
+        if (req.status === RequestStatus.REJECTED) uiStatus = "Rejeitada";
+        if (req.status === RequestStatus.AWAITING_PAYMENT) uiStatus = "Aguardando Pagamento";
+
+        const documentId =
+          user.cpf && user.cpf.trim() !== ""
+            ? user.cpf
+            : `Passaporte: ${user.passport_number}`;
+
+        return {
+          id: req.uuid,
+          userName: user.name,
+          userEmail: user.email,
+          userPhone: req.phone_number,
+          userCpf: documentId,
+          userCategory: RoleLabels[req.role],
+          checkinDate: formatDatePtBr(req.checkin_date),
+          checkoutDate: formatDatePtBr(req.checkout_date),
+          roomType: RoomTypeLabels[req.room_type],
+          specialRequests: req.special_needs || "",
+          status: uiStatus,
+          rawValueStatus: req.status
+        };
+      });
+
+      setParticipants(formatted);
     }
-  };
 
-  const openDetails = (req: Request) => {
-    setSelectedRequest(req);
+    load();
+  }, [eventId]);
+
+  const openDetails = (participant: ParticipantUI) => {
+    setSelected(participant);
     setIsDetailsOpen(true);
   };
 
-  const handleEdit = (id: number) => {
-    console.log("Editar ID:", id);
+  async function handleStatusChange(id: string, newStatus: RequestStatus, newUiStatus: ParticipantUI["status"]) {
+    if (newStatus === RequestStatus.APPROVED) await approveRequest(id);
+    if (newStatus === RequestStatus.REJECTED) await rejectRequest(id);
+
+    setParticipants((prev) =>
+      prev.map((p) =>
+        p.id === id ? { ...p, rawValueStatus: newStatus, status: newUiStatus } : p
+      )
+    );
+
     setIsDetailsOpen(false);
+  }
+
+  const handleEditParticipant = (participant: ParticipantUI) => {
+    router.push(`/admin/events/${eventId}/participants/${participant.id}/edit`);
   };
 
+  const renderBadge = (status: ParticipantUI["status"]) => {
+    switch (status) {
+      case "Aprovada":
+        return <Badge className="bg-green-600 hover:bg-green-700">Confirmado</Badge>;
+      case "Rejeitada":
+        return <Badge variant="destructive">Rejeitado</Badge>;
+      case "Aguardando Pagamento":
+        return (
+          <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200">
+            Ag. Pagamento
+          </Badge>
+        );
+      default:
+        return (
+          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+            Pendente
+          </Badge>
+        );
+    }
+  };
+
+  const ParticipantList = ({ data }: { data: ParticipantUI[] }) => {
+    if (data.length === 0) {
+      return (
+        <div className="text-center py-12 border-2 border-dashed rounded-lg text-muted-foreground bg-gray-50">
+          Nenhum registro encontrado nesta categoria.
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex flex-col gap-3">
+        {data.map((p) => (
+          <Card key={p.id} className="flex flex-col sm:flex-row items-center justify-between p-4 gap-4 hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-4 w-full sm:w-auto">
+              <div
+                className={`h-12 w-12 rounded-full flex items-center justify-center font-bold text-lg border ${
+                  p.status === "Aprovada"
+                    ? "bg-green-100 text-green-700 border-green-200"
+                    : p.status === "Rejeitada"
+                    ? "bg-red-100 text-red-700 border-red-200"
+                    : "bg-blue-100 text-blue-700 border-blue-200"
+                }`}
+              >
+                {p.userName.substring(0, 2).toUpperCase()}
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg leading-tight">{p.userName}</h3>
+                <div className="flex flex-wrap items-center gap-2 mt-1">
+                  <Badge variant="secondary" className="font-normal text-xs">
+                    {p.userCategory}
+                  </Badge>
+                  {renderBadge(p.status)}
+                  <span className="text-xs text-muted-foreground hidden sm:inline-block">
+                    • {p.roomType}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="w-full sm:w-auto flex justify-end gap-2">
+              {(p.status === "Pendente" || p.status === "Aguardando Pagamento") && (
+                <>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="text-red-600 hover:bg-red-50"
+                    onClick={() =>
+                      handleStatusChange(p.id, RequestStatus.REJECTED, "Rejeitada")
+                    }
+                    title="Rejeitar"
+                  >
+                    <XCircle className="h-5 w-5" />
+                  </Button>
+
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="text-green-600 hover:bg-green-50"
+                    onClick={() =>
+                      handleStatusChange(p.id, RequestStatus.APPROVED, "Aprovada")
+                    }
+                    title="Aprovar"
+                  >
+                    <CheckCircle2 className="h-5 w-5" />
+                  </Button>
+                </>
+              )}
+
+              <Button variant="outline" onClick={() => openDetails(p)} className="gap-2">
+                <Eye className="h-4 w-4" />
+                Detalhes
+              </Button>
+            </div>
+          </Card>
+        ))}
+      </div>
+    );
+  };
+
+  const pendingList = participants.filter(
+    (p) => p.status === "Pendente" || p.status === "Aguardando Pagamento"
+  );
+  const approvedList = participants.filter((p) => p.status === "Aprovada");
+  const rejectedList = participants.filter((p) => p.status === "Rejeitada");
+
   return (
-    <div className="p-6">
-      <div className="mb-6 flex items-center gap-4">
-        <Link href={`/admin/events/${eventId}`}>
-          <Button variant="outline" size="icon">
-            <ChevronLeftIcon className="h-4 w-4" />
-          </Button>
-        </Link>
+    <div className="p-6 max-w-5xl mx-auto">
+      <div className="mb-8 flex items-center gap-4">
+        <BackButton route={`/admin/events/${eventId}`} />
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Solicitações Pendentes</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Gestão de Inscrições</h1>
           <p className="text-muted-foreground text-sm">
-            Gerenciamento Solicitações
+            Gerencie solicitações e participantes confirmados.
           </p>
         </div>
       </div>
 
-      <div className="flex flex-col gap-3 max-w-4xl mx-auto">
-        {pendingRequests.length === 0 ? (
-          <div className="text-center py-12 border-2 border-dashed rounded-lg text-muted-foreground">
-            Nenhuma solicitação pendente.
-          </div>
-        ) : (
-          pendingRequests.map((req) => (
-            <Card key={req.id} className="flex flex-col sm:flex-row items-center justify-between p-4 gap-4">
-              
-              <div className="flex items-center gap-3 w-full sm:w-auto">
-                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
-                  {req.userName.substring(0,2).toUpperCase()}
-                </div>
-                <div>
-                  <h3 className="font-semibold text-lg leading-none">{req.userName}</h3>
-                  <div className="mt-1">
-                    <Badge variant="secondary" className="font-normal">
-                      {req.userCategory}
-                    </Badge>
-                  </div>
-                </div>
-              </div>
+      <Tabs defaultValue="all" className="w-full">
+        <TabsList className="mb-6">
+          <TabsTrigger value="all">Todos ({participants.length})</TabsTrigger>
+          <TabsTrigger value="pending" className="flex items-center gap-2">
+            <Clock className="h-4 w-4" />
+            Pendentes ({pendingList.length})
+          </TabsTrigger>
+          <TabsTrigger value="approved" className="flex items-center gap-2">
+            <CheckCircle2 className="h-4 w-4" />
+            Confirmados ({approvedList.length})
+          </TabsTrigger>
+          <TabsTrigger value="rejected" className="flex items-center gap-2">
+            <XCircle className="h-4 w-4" />
+            Rejeitados ({rejectedList.length})
+          </TabsTrigger>
+        </TabsList>
 
-              <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => openDetails(req)}
-                  className="hidden sm:flex"
-                >
-                  <Eye className="mr-2 h-4 w-4" />
-                  Detalhes
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="icon" 
-                  onClick={() => openDetails(req)}
-                  className="sm:hidden"
-                >
-                  <Eye className="h-4 w-4" />
-                </Button>
-
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                  onClick={() => handleEdit(req.id)}
-                  title="Editar"
-                >
-                  <Pencil className="h-4 w-4" />
-                </Button>
-
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                  onClick={() => handleReject(req.id)}
-                  title="Rejeitar"
-                >
-                  <XCircle className="h-5 w-5" />
-                </Button>
-
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                  onClick={() => handleApprove(req.id)}
-                  title="Aprovar"
-                >
-                  <CheckCircle2 className="h-5 w-5" />
-                </Button>
-              </div>
-            </Card>
-          ))
-        )}
-      </div>
+        <TabsContent value="all">
+          <ParticipantList data={participants} />
+        </TabsContent>
+        <TabsContent value="pending">
+          <ParticipantList data={pendingList} />
+        </TabsContent>
+        <TabsContent value="approved">
+          <ParticipantList data={approvedList} />
+        </TabsContent>
+        <TabsContent value="rejected">
+          <ParticipantList data={rejectedList} />
+        </TabsContent>
+      </Tabs>
 
       <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle>Detalhes da Solicitação</DialogTitle>
+            <div className="flex items-center justify-between mr-8">
+              <DialogTitle className="flex items-center gap-2">
+                <UserIcon className="h-5 w-5 text-primary" />
+                Detalhes da Inscrição
+              </DialogTitle>
+              {selected && renderBadge(selected.status)}
+            </div>
             <DialogDescription>
-              Revise os dados completos antes de aprovar.
+              Informações completas do participante e solicitação.
             </DialogDescription>
           </DialogHeader>
-          
-          {selectedRequest && (
-            <div className="grid gap-4 py-4">
-              <div className="space-y-3">
-                <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <User className="h-4 w-4" /> Dados do Participante
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-3 bg-muted/50 rounded-md text-sm">
-                  <div>
-                    <span className="block text-xs text-muted-foreground">Nome Completo</span>
-                    <span className="font-medium">{selectedRequest.userName}</span>
-                  </div>
-                  <div>
-                    <span className="block text-xs text-muted-foreground">Categoria</span>
-                    <span className="font-medium">{selectedRequest.userCategory}</span>
-                  </div>
-                  <div className="sm:col-span-2">
-                    <span className="block text-xs text-muted-foreground">Email</span>
-                    <span>{selectedRequest.userEmail}</span>
-                  </div>
+
+          {selected && (
+            <div className="space-y-6 py-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <span className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                    <UserIcon className="h-3 w-3" />
+                    Nome Completo
+                  </span>
+                  <p className="text-sm font-medium">{selected.userName}</p>
+                </div>
+
+                <div className="space-y-1">
+                  <span className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                    <CreditCard className="h-3 w-3" /> Documento
+                  </span>
+                  <p className="text-sm font-medium">{selected.userCpf}</p>
+                </div>
+
+                <div className="space-y-1">
+                  <span className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                    <Mail className="h-3 w-3" /> E-mail
+                  </span>
+                  <p className="text-sm font-medium">{selected.userEmail}</p>
+                </div>
+
+                <div className="space-y-1">
+                  <span className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                    <Phone className="h-3 w-3" /> Telefone
+                  </span>
+                  <p className="text-sm font-medium">{selected.userPhone}</p>
                 </div>
               </div>
 
+              <Separator />
+
               <div className="space-y-3">
-                <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <BedDouble className="h-4 w-4" /> Dados da Hospedagem
+                <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <BedDouble className="h-4 w-4 text-primary" />
+                  Dados da Reserva
                 </h4>
-                <div className="grid grid-cols-2 gap-4 p-3 bg-muted/50 rounded-md text-sm">
+
+                <div className="bg-muted/50 p-4 rounded-lg grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span className="block text-xs text-muted-foreground">Tipo de Quarto</span>
-                    <span className="font-medium">{selectedRequest.roomType}</span>
-                  </div>
-                  <div>
-                    <span className="block text-xs text-muted-foreground">Período</span>
-                    <span className="font-medium flex items-center gap-1">
+                    <span className="block text-xs text-muted-foreground mb-1">
+                      Entrada (Check-in)
+                    </span>
+                    <div className="flex items-center gap-2 font-medium">
                       <CalendarDays className="h-3 w-3" />
-                      {selectedRequest.checkinDate} até {selectedRequest.checkoutDate}
+                      {selected.checkinDate}
+                    </div>
+                  </div>
+
+                  <div>
+                    <span className="block text-xs text-muted-foreground mb-1">
+                      Saída (Check-out)
+                    </span>
+                    <div className="flex items-center gap-2 font-medium">
+                      <CalendarDays className="h-3 w-3" />
+                      {selected.checkoutDate}
+                    </div>
+                  </div>
+
+                  <div className="col-span-2">
+                    <span className="block text-xs text-muted-foreground mb-1">
+                      Tipo de Quarto
+                    </span>
+                    <span className="font-medium bg-background px-2 py-1 rounded border inline-block">
+                      {selected.roomType}
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <FileText className="h-4 w-4" /> Solicitações Especiais
-                </h4>
-                <div className="p-3 bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-100 dark:border-yellow-900 rounded-md text-sm text-yellow-800 dark:text-yellow-200">
-                  {selectedRequest.specialRequests ? selectedRequest.specialRequests : "Nenhuma observação registrada."}
+              {selected.specialRequests && (
+                <div className="space-y-2">
+                  <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-primary" /> Observações
+                    Especiais
+                  </h4>
+
+                  <div className="p-3 border border-yellow-200 bg-yellow-50 text-yellow-800 text-sm rounded-md">
+                    {selected.specialRequests}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
 
-          <DialogFooter className="gap-2 sm:gap-0">
-            {selectedRequest && (
-              <>
-                <div className="flex-1 flex justify-start">
-                  <Button 
-                    variant="outline" 
-                    onClick={() => handleEdit(selectedRequest.id)}
-                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200"
+          <DialogFooter className="sm:justify-between gap-2 flex-col sm:flex-row">
+            <div className="flex gap-2 justify-end w-full">
+              {(selected?.status === "Pendente" || selected?.status === "Aguardando Pagamento") && (
+                <>
+                  <Button variant="outline" onClick={() => setIsDetailsOpen(false)}>Cancelar</Button>
+                  <Button
+                    variant="secondary"
+                    onClick={() => selected && handleEditParticipant(selected)}
                   >
-                    <Pencil className="mr-2 h-4 w-4" />
-                    Editar Solicitação
+                    <Edit className="h-4 w-4 mr-2" /> Editar
                   </Button>
-                </div>
 
-                <div className="flex gap-2">
-                  <Button 
-                    variant="ghost" 
-                    onClick={() => setIsDetailsOpen(false)}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button 
-                    variant="destructive" 
-                    onClick={() => handleReject(selectedRequest.id)}
+                  <Button
+                    variant="destructive"
+                    onClick={() =>
+                      selected &&
+                      handleStatusChange(
+                        selected.id,
+                        RequestStatus.REJECTED,
+                        "Rejeitada"
+                      )
+                    }
                   >
                     Rejeitar
                   </Button>
-                  <Button 
+
+                  <Button
                     className="bg-green-600 hover:bg-green-700 text-white"
-                    onClick={() => handleApprove(selectedRequest.id)}
+                    onClick={() =>
+                      selected &&
+                      handleStatusChange(
+                        selected.id,
+                        RequestStatus.APPROVED,
+                        "Aprovada"
+                      )
+                    }
                   >
                     Aprovar
                   </Button>
-                </div>
-              </>
-            )}
+                </>
+              )}
+
+              {selected?.status === "Aprovada" && (
+                <Button
+                  variant="outline"
+                  onClick={() => selected && handleEditParticipant(selected)}
+                  className="mr-auto"
+                >
+                  <Edit className="h-4 w-4 mr-2" /> Editar
+                </Button>
+              )}
+
+              <Button variant="ghost" onClick={() => setIsDetailsOpen(false)}>
+                Fechar
+              </Button>
+
+              {selected?.status === "Aprovada" && (
+                <Button
+                  className="gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+                  onClick={() => alert("Download iniciado...")}
+                >
+                  <Download className="h-4 w-4" />
+                  Exportar Dados
+                </Button>
+              )}
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>

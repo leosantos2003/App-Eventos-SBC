@@ -38,7 +38,6 @@ async function sendRequest(path: string, init?: RequestInit, token?: string): Pr
 }
 
 async function refreshAccessToken(): Promise<string> {
-  console.log("Refreshing access token...");
   const refreshToken = localStorage.getItem("refresh");
   if (!refreshToken) {
     alert("Sessão expirada. Por favor, faça login novamente.");

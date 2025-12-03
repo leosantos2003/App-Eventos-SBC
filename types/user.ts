@@ -3,9 +3,9 @@ export interface User {
   email: string;
   name: string;
   cpf: string;
-  passportNumber: number;
-  passportCountry: string;
-  birthDate: string;
+  passport_number: number;
+  passport_country: string;
+  birth_date: string;
   is_staff: boolean;
 }
 
