@@ -365,12 +365,12 @@ export default function ParticipantsPage() {
               {(selected?.status === "Pendente" || selected?.status === "Aguardando Pagamento") && (
                 <>
                   <Button variant="outline" onClick={() => setIsDetailsOpen(false)}>Cancelar</Button>
-                  {/* <Button
+                  <Button
                     variant="secondary"
                     onClick={() => selected && handleEditParticipant(selected)}
                   >
                     <Edit className="h-4 w-4 mr-2" /> Editar
-                  </Button> */}
+                  </Button>
 
                   <Button
                     variant="destructive"
@@ -402,7 +402,7 @@ export default function ParticipantsPage() {
                 </>
               )}
 
-              {/* {selected?.status === "Aprovada" && (
+              {selected?.status === "Aprovada" && (
                 <Button
                   variant="outline"
                   onClick={() => selected && handleEditParticipant(selected)}
@@ -410,7 +410,7 @@ export default function ParticipantsPage() {
                 >
                   <Edit className="h-4 w-4 mr-2" /> Editar
                 </Button>
-              )} */}
+              )}
 
               <Button variant="ghost" onClick={() => setIsDetailsOpen(false)}>
                 Fechar

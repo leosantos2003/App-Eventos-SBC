@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import Link from "next/link";
+import "./payment.css";
 
 export default function PaymentPage() {
   const [valor] = useState("0.00"); // valor a ser exibido no titulo do pagamento, fazer fetch futuramente

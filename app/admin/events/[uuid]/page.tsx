@@ -141,9 +141,9 @@ export default function EventDetailsPage() {
                 </Button>
 
                 <Button asChild variant="outline" className="justify-start h-12 w-full hover:bg-purple-50 hover:text-purple-700 border-gray-200">
-                  <Link href={`/admin/events/${event.uuid}/participants`}>
+                  <Link href={`/admin/events/${event.uuid}/requests`}>
                     <Users className="mr-3 h-4 w-4 text-purple-600" />
-                    Gestão de Participantes
+                    Gestão de Solicitações
                   </Link>
                 </Button>
 
