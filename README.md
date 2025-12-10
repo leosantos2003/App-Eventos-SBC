@@ -1,3 +1,11 @@
+# App-Eventos-SBC
+
+* **O problema:** A Sociedade Brasileira de Computação realiza eventos com frequência que reúnem diversos convidaos. A organização dos eventos sofria com a falta de um sistema centralizado, o que gerava vários problemas operacionais. Era difícil acompanhar as solicitações dos convidados e monitorar os pagamento já realizados. Também faltava um local único para organizar os eventos e validar as solicitações. Essa desorganização tornava o processo lento, sujeito a erros e difícil de rastrear.
+
+* **A solução:** Criamos uma plataforma única para integrar todas essas etapas e facilitar o trabalho de todos. O site permite que os organizadores criem eventos, controlem pedidos e gerem relatórios de solicitações, ao mesmo tempo que oferece aos participantes uma forma simples de solicitar hospedagem e passagens. O objetivo é automatizar tarefas manuais e garantir que todas as informações fiquem seguras e organizadas em um só lugar.
+
+## Screenshots
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
