@@ -7,28 +7,28 @@
 ## Screenshots
 
 <div style="display: flex; justify-content: center;">
-  <img width="1919" height="996" alt="Captura de tela de 2025-12-10 19-50-28" src="https://github.com/user-attachments/assets/d984713b-0c7a-48de-8783-97c5323dff9a" />
-  <img width="1919" height="996" alt="Captura de tela de 2025-12-10 19-50-50" src="https://github.com/user-attachments/assets/264e82cc-4acd-4fdb-a6ac-49341950d2a7" />
+  <img style="width: 48%;" width="1919" height="996" alt="Captura de tela de 2025-12-10 19-50-28" src="https://github.com/user-attachments/assets/d984713b-0c7a-48de-8783-97c5323dff9a" />
+  <img style="width: 48%;" width="1919" height="996" alt="Captura de tela de 2025-12-10 19-50-50" src="https://github.com/user-attachments/assets/264e82cc-4acd-4fdb-a6ac-49341950d2a7" />
 </div>
 
 <div style="display: flex; justify-content: center;">
-  <img width="1919" height="996" alt="Captura de tela de 2025-12-10 19-53-08" src="https://github.com/user-attachments/assets/1acb2e9b-9bad-4795-8c04-8699cf69816c" />
-  <img width="1919" height="996" alt="Captura de tela de 2025-12-10 19-53-22" src="https://github.com/user-attachments/assets/edf45c05-2f8b-43f2-84e3-441514e8274e" />
+  <img style="width: 48%;" width="1919" height="996" alt="Captura de tela de 2025-12-10 19-53-08" src="https://github.com/user-attachments/assets/1acb2e9b-9bad-4795-8c04-8699cf69816c" />
+  <img style="width: 48%;" width="1919" height="996" alt="Captura de tela de 2025-12-10 19-53-22" src="https://github.com/user-attachments/assets/edf45c05-2f8b-43f2-84e3-441514e8274e" />
 </div>
 
 <div style="display: flex; justify-content: center;">
-  <img width="1919" height="996" alt="Captura de tela de 2025-12-10 19-53-54" src="https://github.com/user-attachments/assets/674a7b7b-8a12-4049-bf77-f07250932bea" />
-  <img width="1919" height="996" alt="Captura de tela de 2025-12-10 19-57-41" src="https://github.com/user-attachments/assets/4223a07c-8e71-4fb3-bd89-fbbcad0ccdb2" />
+  <img style="width: 48%;"width="1919" height="996" alt="Captura de tela de 2025-12-10 19-53-54" src="https://github.com/user-attachments/assets/674a7b7b-8a12-4049-bf77-f07250932bea" />
+  <img style="width: 48%;" width="1919" height="996" alt="Captura de tela de 2025-12-10 19-57-41" src="https://github.com/user-attachments/assets/4223a07c-8e71-4fb3-bd89-fbbcad0ccdb2" />
 </div>
 
 <div style="display: flex; justify-content: center;">
-  <img width="1919" height="996" alt="Captura de tela de 2025-12-10 19-57-56" src="https://github.com/user-attachments/assets/626fdd69-9aaf-4929-96ad-5e61f38334ca" />
-  <img width="1919" height="996" alt="Captura de tela de 2025-12-10 19-58-32" src="https://github.com/user-attachments/assets/2f00d408-aa33-4506-8f52-267f446e805e" />
+  <img style="width: 48%;" width="1919" height="996" alt="Captura de tela de 2025-12-10 19-57-56" src="https://github.com/user-attachments/assets/626fdd69-9aaf-4929-96ad-5e61f38334ca" />
+  <img style="width: 48%;" width="1919" height="996" alt="Captura de tela de 2025-12-10 19-58-32" src="https://github.com/user-attachments/assets/2f00d408-aa33-4506-8f52-267f446e805e" />
 </div>
 
 <div style="display: flex; justify-content: center;">
-  <img width="1919" height="996" alt="Captura de tela de 2025-12-10 20-07-52" src="https://github.com/user-attachments/assets/586f75c0-483f-4f50-ad2b-022a7f50632f" />
-  <img width="1919" height="996" alt="Captura de tela de 2025-12-10 20-08-05" src="https://github.com/user-attachments/assets/2a62626d-2e46-4081-893f-d48978cb8abd" />
+  <img style="width: 48%;" width="1919" height="996" alt="Captura de tela de 2025-12-10 20-07-52" src="https://github.com/user-attachments/assets/586f75c0-483f-4f50-ad2b-022a7f50632f" />
+  <img style="width: 48%;" width="1919" height="996" alt="Captura de tela de 2025-12-10 20-08-05" src="https://github.com/user-attachments/assets/2a62626d-2e46-4081-893f-d48978cb8abd" />
 </div>
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
