@@ -1,5 +1,4 @@
-const PORT = 8000;
-const BASE_URL = `http://localhost:${PORT}`
+const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_BASE_URL;
 
 export const Routes = Object.freeze({
   users: `${BASE_URL}/users/`,
